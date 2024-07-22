@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableMap;
 import io.aiven.kafka.tieredstorage.fetch.cache.ChunkCache;
 import io.aiven.kafka.tieredstorage.fetch.cache.DiskChunkCache;
 import io.aiven.kafka.tieredstorage.fetch.cache.MemoryChunkCache;
@@ -52,7 +53,7 @@ class ChunkManagerFactoryTest {
 
     @Test
     void defaultChunkManager() {
-        chunkManagerFactory.configure(Map.of());
+        chunkManagerFactory.configure(ImmutableMap.of());
         final ChunkManager chunkManager = chunkManagerFactory.initChunkManager(null, null);
         assertThat(chunkManager).isInstanceOf(DefaultChunkManager.class);
     }
@@ -60,7 +61,7 @@ class ChunkManagerFactoryTest {
     @ParameterizedTest
     @MethodSource("cachingChunkManagers")
     void cachingChunkManagers(final Class<ChunkCache<?>> cls) {
-        chunkManagerFactory.configure(Map.of(
+        chunkManagerFactory.configure(ImmutableMap.of(
                 "fetch.chunk.cache.class", cls,
                 "fetch.chunk.cache.size", 10,
                 "fetch.chunk.cache.retention.ms", 10,
@@ -70,7 +71,7 @@ class ChunkManagerFactoryTest {
         try (final MockedConstruction<?> ignored = mockConstruction(cls)) {
             final ChunkManager chunkManager = chunkManagerFactory.initChunkManager(null, null);
             assertThat(chunkManager).isInstanceOf(cls);
-            verify((ChunkCache<?>) chunkManager).configure(Map.of(
+            verify((ChunkCache<?>) chunkManager).configure(ImmutableMap.of(
                 "class", cls,
                 "size", 10,
                 "retention.ms", 10
@@ -80,7 +81,7 @@ class ChunkManagerFactoryTest {
 
     @Test
     void failedInitialization() {
-        chunkManagerFactory.configure(Map.of("fetch.chunk.cache.class", MemoryChunkCache.class));
+        chunkManagerFactory.configure(ImmutableMap.of("fetch.chunk.cache.class", MemoryChunkCache.class));
         try (final MockedConstruction<?> ignored = mockConstruction(MemoryChunkCache.class,
             (cachingChunkManager, context) -> {
                 throw new InvocationTargetException(null);

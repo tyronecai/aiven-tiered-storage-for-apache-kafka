@@ -18,11 +18,13 @@ package io.aiven.kafka.tieredstorage.transform;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Random;
 
 import io.aiven.kafka.tieredstorage.AesKeyAwareTest;
 import io.aiven.kafka.tieredstorage.manifest.index.ChunkIndex;
 
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -37,7 +39,7 @@ public class TransformsEndToEndTest extends AesKeyAwareTest {
     @BeforeAll
     static void init() {
         original = new byte[ORIGINAL_SIZE];
-        final var random = new Random();
+        final Random random = new Random();
         random.nextBytes(original);
     }
 
@@ -78,13 +80,13 @@ public class TransformsEndToEndTest extends AesKeyAwareTest {
         if (encryption) {
             transformEnum = new EncryptionChunkEnumeration(transformEnum, AesKeyAwareTest::encryptionCipherSupplier);
         }
-        final var transformFinisher = chunkSize == 0
+        final TransformFinisher transformFinisher = chunkSize == 0
             ? new TransformFinisher(transformEnum, null)
             : new TransformFinisher(transformEnum, ORIGINAL_SIZE, null);
         final byte[] uploadedData;
         final ChunkIndex chunkIndex;
-        try (final var sis = transformFinisher.toInputStream()) {
-            uploadedData = sis.readAllBytes();
+        try (final InputStream sis = transformFinisher.toInputStream()) {
+            uploadedData = IO2Utils.toByteArray(sis);
             chunkIndex = transformFinisher.chunkIndex();
         }
 
@@ -99,9 +101,9 @@ public class TransformsEndToEndTest extends AesKeyAwareTest {
         if (compression) {
             detransformEnum = new DecompressionChunkEnumeration(detransformEnum);
         }
-        final var detransformFinisher = new DetransformFinisher(detransformEnum);
-        try (final var sis = detransformFinisher.toInputStream()) {
-            final byte[] downloaded = sis.readAllBytes();
+        final DetransformFinisher detransformFinisher = new DetransformFinisher(detransformEnum);
+        try (final InputStream sis = detransformFinisher.toInputStream()) {
+            final byte[] downloaded = IO2Utils.toByteArray(sis);
             assertThat(downloaded).isEqualTo(original);
         }
     }

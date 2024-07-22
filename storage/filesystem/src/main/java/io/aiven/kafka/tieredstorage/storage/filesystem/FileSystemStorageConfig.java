@@ -17,6 +17,7 @@
 package io.aiven.kafka.tieredstorage.storage.filesystem;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.apache.kafka.common.config.AbstractConfig;
@@ -54,6 +55,6 @@ class FileSystemStorageConfig extends AbstractConfig {
     }
 
     final Path root() {
-        return Path.of(getString(ROOT_CONFIG));
+        return Paths.get(getString(ROOT_CONFIG));
     }
 }

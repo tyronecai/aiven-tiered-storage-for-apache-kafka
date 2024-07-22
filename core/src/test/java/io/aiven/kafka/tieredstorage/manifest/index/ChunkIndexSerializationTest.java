@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import io.aiven.kafka.tieredstorage.Chunk;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -75,7 +76,7 @@ public class ChunkIndexSerializationTest {
 
     @Test
     void serializeFixedSizeChunkIndex() throws JsonProcessingException {
-        final var fixedSizeChunkIndex = new FixedSizeChunkIndex(
+        final FixedSizeChunkIndex fixedSizeChunkIndex = new FixedSizeChunkIndex(
             100, 250, 110, 30);
         assertThat(mapper.writeValueAsString(fixedSizeChunkIndex))
             .isEqualTo(FIXED_SIZE_CHUNK_INDEX_JSON);
@@ -100,8 +101,8 @@ public class ChunkIndexSerializationTest {
 
     @Test
     void serializeVariableSizeChunkIndex() throws JsonProcessingException {
-        final var variableSizeChunkIndex = new VariableSizeChunkIndex(
-            100, 250, List.of(10, 20, 30));
+        final VariableSizeChunkIndex variableSizeChunkIndex = new VariableSizeChunkIndex(
+            100, 250, ImmutableList.of(10, 20, 30));
 
         assertThat(mapper.writeValueAsString(variableSizeChunkIndex))
             .isEqualTo(VARIABLE_CHUNK_INDEX_JSON);

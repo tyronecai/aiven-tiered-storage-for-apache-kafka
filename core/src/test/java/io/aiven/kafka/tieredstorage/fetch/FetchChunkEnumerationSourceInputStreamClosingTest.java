@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
 import org.apache.kafka.server.log.remote.storage.RemoteStorageManager.IndexType;
 
 import io.aiven.kafka.tieredstorage.fetch.cache.DiskChunkCache;
@@ -88,10 +91,10 @@ class FetchChunkEnumerationSourceInputStreamClosingTest {
         final ChunkManagerFactory chunkManagerFactory = new ChunkManagerFactory();
         chunkManagerFactory.configure(config);
         final ChunkManager chunkManager = chunkManagerFactory.initChunkManager(fetcher, null);
-        final var is = new FetchChunkEnumeration(chunkManager, OBJECT_KEY, SEGMENT_MANIFEST, range)
+        final InputStream is = new FetchChunkEnumeration(chunkManager, OBJECT_KEY, SEGMENT_MANIFEST, range)
             .toInputStream();
         if (readFully) {
-            is.readAllBytes();
+            IO2Utils.toByteArray(is);
         } else {
             is.read();
         }
@@ -104,16 +107,16 @@ class FetchChunkEnumerationSourceInputStreamClosingTest {
         final BytesRange bigRange = BytesRange.ofFromPositionAndSize(3, 25);
 
         final List<Arguments> result = new ArrayList<>();
-        for (final var readFully : List.of(Named.of("read fully", true), Named.of("read partially", false))) {
-            for (final BytesRange range : List.of(smallRange, bigRange)) {
+        for (final Named<Boolean> readFully : ImmutableList.of(Named.of("read fully", true), Named.of("read partially", false))) {
+            for (final BytesRange range : ImmutableList.of(smallRange, bigRange)) {
                 result.add(Arguments.of(
-                    Named.of("without cache", Map.of()),
+                    Named.of("without cache", ImmutableMap.of()),
                     readFully,
                     range)
                 );
                 result.add(Arguments.of(
                     Named.of("with in-memory cache",
-                        Map.of(
+                        ImmutableMap.of(
                             "fetch.chunk.cache.class", MemoryChunkCache.class.getCanonicalName(),
                             "fetch.chunk.cache.size", "-1"
                         )
@@ -123,7 +126,7 @@ class FetchChunkEnumerationSourceInputStreamClosingTest {
                 );
                 result.add(Arguments.of(
                     Named.of("with disk-based cache",
-                        Map.of(
+                        ImmutableMap.of(
                             "fetch.chunk.cache.class", DiskChunkCache.class.getCanonicalName(),
                             "fetch.chunk.cache.path", Files.createTempDirectory("cache").toString(),
                             "fetch.chunk.cache.size", "-1"
@@ -167,7 +170,7 @@ class FetchChunkEnumerationSourceInputStreamClosingTest {
 
         public void assertAllStreamsWereClosed(final boolean readFully) throws IOException {
             if (readFully) {
-                for (final var is : openInputStreams) {
+                for (final InputStream is : openInputStreams) {
                     verify(is).close();
                 }
             } else {

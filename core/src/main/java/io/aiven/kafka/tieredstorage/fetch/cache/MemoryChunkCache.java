@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
 import org.apache.kafka.common.config.ConfigDef;
 
 import io.aiven.kafka.tieredstorage.fetch.ChunkKey;
@@ -45,8 +46,10 @@ public class MemoryChunkCache extends ChunkCache<byte[]> {
 
     @Override
     public byte[] cacheChunk(final ChunkKey chunkKey, final InputStream chunk) throws IOException {
-        try (chunk) {
-            return chunk.readAllBytes();
+        try {
+            return IO2Utils.toByteArray(chunk);
+        } finally {
+            chunk.close();
         }
     }
 

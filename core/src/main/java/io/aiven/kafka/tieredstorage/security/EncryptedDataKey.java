@@ -25,7 +25,7 @@ public class EncryptedDataKey {
 
     public EncryptedDataKey(final String keyEncryptionKeyId, final byte[] encryptedDataKey) {
         this.keyEncryptionKeyId = Objects.requireNonNull(keyEncryptionKeyId, "keyEncryptionKeyId cannot be null");
-        if (keyEncryptionKeyId.isBlank()) {
+        if (keyEncryptionKeyId.trim().isEmpty()) {
             throw new IllegalArgumentException("keyEncryptionKeyId cannot be blank");
         }
         this.encryptedDataKey = Objects.requireNonNull(encryptedDataKey, "encryptedDataKey cannot be null");

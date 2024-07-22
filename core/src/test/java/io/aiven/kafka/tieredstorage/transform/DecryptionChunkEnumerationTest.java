@@ -69,7 +69,7 @@ class DecryptionChunkEnumerationTest extends AesKeyAwareTest {
 
     @Test
     void hasMoreElementsPropagated() {
-        final var transform = new DecryptionChunkEnumeration(inner, ivSize, this::cipherSupplier);
+        final DecryptionChunkEnumeration transform = new DecryptionChunkEnumeration(inner, ivSize, this::cipherSupplier);
         when(inner.hasMoreElements())
             .thenReturn(true)
             .thenReturn(false);
@@ -87,7 +87,7 @@ class DecryptionChunkEnumerationTest extends AesKeyAwareTest {
         System.arraycopy(iv, 0, encrypted, 0, iv.length);
         encryptionCipher.doFinal(data, 0, data.length, encrypted, iv.length);
 
-        final var transform = new DecryptionChunkEnumeration(inner, ivSize, AesKeyAwareTest::decryptionCipherSupplier);
+        final DecryptionChunkEnumeration transform = new DecryptionChunkEnumeration(inner, ivSize, AesKeyAwareTest::decryptionCipherSupplier);
         when(inner.nextElement()).thenReturn(encrypted);
         final byte[] decrypted = transform.nextElement();
 

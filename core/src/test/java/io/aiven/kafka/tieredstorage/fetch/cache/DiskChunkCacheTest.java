@@ -20,8 +20,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import io.aiven.kafka.tieredstorage.fetch.ChunkKey;
 import io.aiven.kafka.tieredstorage.fetch.ChunkManager;
 
@@ -65,7 +67,7 @@ class DiskChunkCacheTest {
 
     @BeforeEach
     void setUp() {
-        diskChunkCache.configure(Map.of(
+        diskChunkCache.configure(ImmutableMap.of(
             "retention.ms", "-1",
             "size", "-1",
             "path", baseCachePath.toString()
@@ -132,7 +134,7 @@ class DiskChunkCacheTest {
 
     @Test
     void failsToReadFile() {
-        assertThatThrownBy(() -> diskChunkCache.cachedChunkToInputStream(Path.of("does_not_exists")))
+        assertThatThrownBy(() -> diskChunkCache.cachedChunkToInputStream(Paths.get("does_not_exists")))
             .isInstanceOf(RuntimeException.class)
             .hasCauseInstanceOf(IOException.class);
     }
@@ -215,7 +217,7 @@ class DiskChunkCacheTest {
         final DiskChunkCache spy = spy(
             new DiskChunkCache(mock(ChunkManager.class))
         );
-        final Map<String, String> configs = Map.of(
+        final Map<String, String> configs = ImmutableMap.of(
             "retention.ms", "-1",
             "size", "-1",
             "path", baseCachePath.toString()

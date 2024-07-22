@@ -19,6 +19,8 @@ package io.aiven.kafka.tieredstorage.manifest.index;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.aiven.kafka.tieredstorage.Chunk;
 import io.aiven.kafka.tieredstorage.storage.BytesRange;
 
@@ -27,8 +29,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public abstract class AbstractChunkIndex implements ChunkIndex {
     @JsonProperty("originalChunkSize")
     protected final int originalChunkSize;
+
     @JsonProperty("originalFileSize")
     protected final int originalFileSize;
+
     protected final int finalTransformedChunkSize;
     protected final int chunkCount;
 
@@ -68,7 +72,7 @@ public abstract class AbstractChunkIndex implements ChunkIndex {
                 transformedPosition += transformedSize;
             }
         }
-        return List.copyOf(chunks);  // make unmodifiable
+        return ImmutableList.copyOf(chunks);  // make unmodifiable
     }
 
     @Override
@@ -112,7 +116,7 @@ public abstract class AbstractChunkIndex implements ChunkIndex {
     @Override
     public List<Chunk> chunksForRange(final BytesRange bytesRange) {
         Chunk current;
-        final var result = new ArrayList<Chunk>();
+        final List<Chunk> result = new ArrayList<Chunk>();
         for (int i = bytesRange.firstPosition();
              i <= bytesRange.lastPosition() && i < originalFileSize;
              i += current.originalSize) {

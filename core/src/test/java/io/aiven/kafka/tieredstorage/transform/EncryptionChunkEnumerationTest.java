@@ -63,7 +63,7 @@ class EncryptionChunkEnumerationTest extends AesKeyAwareTest {
     void originalChunkSizePropagated() {
         when(inner.originalChunkSize()).thenReturn(100);
         when(cipher.getIV()).thenReturn(new byte[ivSize]);
-        final var transform = new EncryptionChunkEnumeration(inner, this::cipherSupplier);
+        final EncryptionChunkEnumeration transform = new EncryptionChunkEnumeration(inner, this::cipherSupplier);
         assertThat(transform.originalChunkSize()).isEqualTo(100);
         verify(inner).originalChunkSize();
     }
@@ -71,7 +71,7 @@ class EncryptionChunkEnumerationTest extends AesKeyAwareTest {
     @Test
     void transformedChunkSizeIsPropagatedWhenNull() {
         when(inner.transformedChunkSize()).thenReturn(null);
-        final var transform = new EncryptionChunkEnumeration(inner, this::cipherSupplier);
+        final EncryptionChunkEnumeration transform = new EncryptionChunkEnumeration(inner, this::cipherSupplier);
         assertThat(transform.transformedChunkSize()).isNull();
         verify(inner).transformedChunkSize();
     }
@@ -81,14 +81,14 @@ class EncryptionChunkEnumerationTest extends AesKeyAwareTest {
         when(inner.transformedChunkSize()).thenReturn(100);
         when(cipher.getIV()).thenReturn(new byte[ivSize]);
         when(cipher.getOutputSize(100)).thenReturn(100);
-        final var transform = new EncryptionChunkEnumeration(inner, this::cipherSupplier);
+        final EncryptionChunkEnumeration transform = new EncryptionChunkEnumeration(inner, this::cipherSupplier);
         assertThat(transform.transformedChunkSize()).isEqualTo(100 + ivSize);
     }
 
     @Test
     void hasMoreElementsPropagated() {
         when(inner.transformedChunkSize()).thenReturn(null);
-        final var transform = new EncryptionChunkEnumeration(inner, this::cipherSupplier);
+        final EncryptionChunkEnumeration transform = new EncryptionChunkEnumeration(inner, this::cipherSupplier);
         when(inner.hasMoreElements())
             .thenReturn(true)
             .thenReturn(false);
@@ -101,7 +101,7 @@ class EncryptionChunkEnumerationTest extends AesKeyAwareTest {
     void encrypt() throws IllegalBlockSizeException, BadPaddingException {
         final byte[] data = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-        final var transform = new EncryptionChunkEnumeration(inner, AesKeyAwareTest::encryptionCipherSupplier);
+        final EncryptionChunkEnumeration transform = new EncryptionChunkEnumeration(inner, AesKeyAwareTest::encryptionCipherSupplier);
         when(inner.nextElement()).thenReturn(data);
         final byte[] encrypted = transform.nextElement();
 

@@ -33,6 +33,7 @@ public class SegmentCompressionChecker {
     /**
      * @param file Kafka log segment file
      * @return true if log segment is compressed, otherwise returns false
+     * 确认数据是否开了压缩
      */
     public static boolean check(final File file) throws InvalidRecordBatchException {
         try (final FileRecords records = FileRecords.open(file, false, true, 0, false)) {

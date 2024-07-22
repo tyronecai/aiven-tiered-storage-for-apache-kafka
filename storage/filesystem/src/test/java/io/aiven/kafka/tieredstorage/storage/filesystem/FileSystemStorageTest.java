@@ -17,10 +17,11 @@
 package io.aiven.kafka.tieredstorage.storage.filesystem;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import io.aiven.kafka.tieredstorage.storage.BaseStorageTest;
 import io.aiven.kafka.tieredstorage.storage.StorageBackend;
 import io.aiven.kafka.tieredstorage.storage.StorageBackendException;
@@ -40,18 +41,18 @@ class FileSystemStorageTest extends BaseStorageTest {
     @Override
     protected StorageBackend storage() {
         final FileSystemStorage storage = new FileSystemStorage();
-        storage.configure(Map.of("root", root.toString()));
+        storage.configure(ImmutableMap.of("root", root.toString()));
         return storage;
     }
 
     @Test
     void testRootCannotBeAFile() throws IOException {
         final Path wrongRoot = root.resolve("file_instead");
-        Files.writeString(wrongRoot, "Wrong root");
+        Files.write(wrongRoot, "Wrong root".getBytes(StandardCharsets.UTF_8));
 
         assertThatThrownBy(() -> {
             final FileSystemStorage storage = new FileSystemStorage();
-            storage.configure(Map.of("root", wrongRoot.toString()));
+            storage.configure(ImmutableMap.of("root", wrongRoot.toString()));
         })
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage(wrongRoot + " must be a writable directory");
@@ -59,24 +60,27 @@ class FileSystemStorageTest extends BaseStorageTest {
 
     @Test
     void testRootCannotBeNonWritableDirectory() throws IOException {
-        final Path nonWritableDir = root.resolve("non_writable");
-        Files.createDirectory(nonWritableDir).toFile().setReadOnly();
+        // 对root用户无效
+        if (!"root".equals(System.getProperty("user.name"))) {
+            final Path nonWritableDir = root.resolve("non_writable");
+            Files.createDirectory(nonWritableDir).toFile().setReadOnly();
 
-        assertThatThrownBy(() -> {
-            final FileSystemStorage storage = new FileSystemStorage();
-            storage.configure(Map.of("root", nonWritableDir.toString()));
-        })
+            assertThatThrownBy(() -> {
+                final FileSystemStorage storage = new FileSystemStorage();
+                storage.configure(ImmutableMap.of("root", nonWritableDir.toString()));
+            })
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage(nonWritableDir + " must be a writable directory");
+        }
     }
 
     @Test
     void testDeleteAllParentsButRoot() throws IOException, StorageBackendException {
         final Path keyPath = root.resolve(TOPIC_PARTITION_SEGMENT_KEY.value());
         Files.createDirectories(keyPath.getParent());
-        Files.writeString(keyPath, "test");
+        Files.write(keyPath, "test".getBytes(StandardCharsets.UTF_8));
         final FileSystemStorage storage = new FileSystemStorage();
-        storage.configure(Map.of("root", root.toString()));
+        storage.configure(ImmutableMap.of("root", root.toString()));
         storage.delete(TOPIC_PARTITION_SEGMENT_KEY);
 
         assertThat(keyPath).doesNotExist(); // segment key
@@ -91,11 +95,11 @@ class FileSystemStorageTest extends BaseStorageTest {
         final String key = "key";
         final Path parentPath = root.resolve(parent);
         Files.createDirectories(parentPath);
-        Files.writeString(parentPath.resolve("another"), "test");
+        Files.write(parentPath.resolve("another"), "test".getBytes(StandardCharsets.UTF_8));
         final Path keyPath = parentPath.resolve(key);
-        Files.writeString(keyPath, "test");
+        Files.write(keyPath, "test".getBytes(StandardCharsets.UTF_8));
         final FileSystemStorage storage = new FileSystemStorage();
-        storage.configure(Map.of("root", root.toString()));
+        storage.configure(ImmutableMap.of("root", root.toString()));
         storage.delete(new TestObjectKey(parent + "/" + key));
 
         assertThat(keyPath).doesNotExist();

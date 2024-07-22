@@ -16,11 +16,12 @@
 
 package io.aiven.kafka.tieredstorage.config;
 
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.config.ConfigException;
 
 import io.aiven.kafka.tieredstorage.metadata.SegmentCustomMetadataField;
@@ -35,8 +36,8 @@ import static org.assertj.core.api.Assertions.entry;
 class RemoteStorageManagerConfigTest {
     @Test
     void minimalConfig() {
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123"
             )
@@ -58,8 +59,8 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void segmentManifestCacheSizeUnbounded() {
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "segment.manifest.cache.size", "-1"
@@ -70,8 +71,8 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void segmentManifestCacheSizeBounded() {
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "segment.manifest.cache.size", "42"
@@ -82,8 +83,8 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void segmentManifestCacheRetentionForever() {
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "segment.manifest.cache.retention.ms", "-1"
@@ -94,8 +95,8 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void segmentManifestCacheRetentionLimited() {
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "segment.manifest.cache.retention.ms", "42"
@@ -106,8 +107,8 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void compression() {
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "compression.enabled", "true",
@@ -120,8 +121,8 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void encryption() {
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "encryption.enabled", "true",
@@ -136,14 +137,14 @@ class RemoteStorageManagerConfigTest {
         assertThat(config.encryptionEnabled()).isTrue();
         assertThat(config.encryptionKeyPairId()).isEqualTo("k2");
         assertThat(config.encryptionKeyRing()).containsExactly(
-            entry("k1", new KeyPairPaths(Path.of("k1_public.key"), Path.of("k1_private.key"))),
-            entry("k2", new KeyPairPaths(Path.of("k2_public.key"), Path.of("k2_private.key")))
+            entry("k1", new KeyPairPaths(Paths.get("k1_public.key"), Paths.get("k1_private.key"))),
+            entry("k2", new KeyPairPaths(Paths.get("k2_public.key"), Paths.get("k2_private.key")))
         );
     }
 
     @Test
     void encryptionEnabledKeyPairIdIsNotProvided() {
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
             "chunk.size", "123",
             "encryption.enabled", "true"
@@ -155,7 +156,7 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void encryptionEnabledKeyPairsAreNotProvided() {
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
             "chunk.size", "123",
             "encryption.enabled", "true",
@@ -169,7 +170,7 @@ class RemoteStorageManagerConfigTest {
     @Test
     void encryptionEnabledActiveKeyNotDefined() {
         // The key defined in `encryption.key.pair.id` is not present in `encryption.key.pairs`.
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
             "chunk.size", "123",
             "encryption.enabled", "true",
@@ -183,7 +184,7 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void encryptionEnabledMissingPublicKey() {
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
             "chunk.size", "123",
             "encryption.enabled", "true",
@@ -198,7 +199,7 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void encryptionEnabledMissingPrivateKey() {
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
             "chunk.size", "123",
             "encryption.enabled", "true",
@@ -215,7 +216,7 @@ class RemoteStorageManagerConfigTest {
     @Test
     void objectStorageFactoryIncorrectClass() {
         assertThatThrownBy(() -> new RemoteStorageManagerConfig(
-            Map.of(
+            ImmutableMap.of(
                 "storage.backend.class", "x"
             )
         )).isInstanceOf(ConfigException.class)
@@ -246,12 +247,12 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void missingRequiredFields() {
-        assertThatThrownBy(() -> new RemoteStorageManagerConfig(Map.of()))
+        assertThatThrownBy(() -> new RemoteStorageManagerConfig(ImmutableMap.of()))
             .isInstanceOf(ConfigException.class)
             .hasMessage("Missing required configuration \"storage.backend.class\" which has no default value.");
 
         assertThatThrownBy(() -> new RemoteStorageManagerConfig(
-            Map.of(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName()
             )
         )).isInstanceOf(ConfigException.class)
@@ -260,8 +261,8 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void objectStorageFactoryIsConfigured() {
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "storage.config1", "aaa",
                 "storage.config2", "123",
@@ -271,7 +272,7 @@ class RemoteStorageManagerConfigTest {
         );
         final NoopStorageBackend factory = (NoopStorageBackend) config.storage();
         assertThat(factory.configureCalled).isTrue();
-        assertThat(factory.configuredWith).isEqualTo(new NoopStorageBackend.Config(Map.of(
+        assertThat(factory.configuredWith).isEqualTo(new NoopStorageBackend.Config(ImmutableMap.of(
             "backend.class", NoopStorageBackend.class.getCanonicalName(),
             "config1", "aaa",
             "config2", "123",
@@ -282,7 +283,7 @@ class RemoteStorageManagerConfigTest {
     @Test
     void invalidChunkSizeRange() {
         assertThatThrownBy(() -> new RemoteStorageManagerConfig(
-            Map.of(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "0"
             )
@@ -290,7 +291,7 @@ class RemoteStorageManagerConfigTest {
             .hasMessage("Invalid value 0 for configuration chunk.size: Value must be at least 1");
 
         assertThatThrownBy(() -> new RemoteStorageManagerConfig(
-            Map.of(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", Long.toString((long) Integer.MAX_VALUE + 1)
             )
@@ -302,7 +303,7 @@ class RemoteStorageManagerConfigTest {
     @Test
     void invalidCompressionConfig() {
         assertThatThrownBy(() -> new RemoteStorageManagerConfig(
-            Map.of(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "compression.enabled", "false",
@@ -314,8 +315,8 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void validCustomMetadataFieldsUppercase() {
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "custom.metadata.fields.include", "REMOTE_SIZE,OBJECT_PREFIX,OBJECT_KEY"
@@ -331,7 +332,7 @@ class RemoteStorageManagerConfigTest {
     @Test
     void invalidCustomMetadataFields() {
         assertThatThrownBy(() -> new RemoteStorageManagerConfig(
-            Map.of(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "custom.metadata.fields.include", "unknown"
@@ -343,8 +344,8 @@ class RemoteStorageManagerConfigTest {
 
     @Test
     void keyPrefixMasking() {
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "key.prefix.mask", "true"
@@ -357,7 +358,7 @@ class RemoteStorageManagerConfigTest {
     void uploadRateLimitInvalid() {
         assertThatThrownBy(() ->
             new RemoteStorageManagerConfig(
-                Map.of(
+                ImmutableMap.of(
                     "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                     "chunk.size", "123",
                     "upload.rate.limit.bytes.per.second", "122"
@@ -371,8 +372,8 @@ class RemoteStorageManagerConfigTest {
     @Test
     void uploadRateLimitValid() {
         final int limit = 1024 * 1024;
-        final var config = new RemoteStorageManagerConfig(
-            Map.of(
+        final RemoteStorageManagerConfig config = new RemoteStorageManagerConfig(
+            ImmutableMap.of(
                 "storage.backend.class", NoopStorageBackend.class.getCanonicalName(),
                 "chunk.size", "123",
                 "upload.rate.limit.bytes.per.second", Integer.toString(limit)

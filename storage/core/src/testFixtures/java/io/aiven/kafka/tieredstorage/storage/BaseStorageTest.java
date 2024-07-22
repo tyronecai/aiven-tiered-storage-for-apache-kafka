@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
 import org.assertj.core.util.Throwables;
 import org.junit.jupiter.api.Test;
 
@@ -44,13 +45,13 @@ public abstract class BaseStorageTest {
         assertThat(size).isEqualTo(data.length);
 
         try (final InputStream fetch = storage().fetch(TOPIC_PARTITION_SEGMENT_KEY)) {
-            final String r = new String(fetch.readAllBytes());
+            final String r = new String(IO2Utils.toByteArray(fetch));
             assertThat(r).isEqualTo("some file");
         }
 
         final BytesRange range = BytesRange.of(1, data.length - 2);
         try (final InputStream fetch = storage().fetch(TOPIC_PARTITION_SEGMENT_KEY, range)) {
-            final String r = new String(fetch.readAllBytes());
+            final String r = new String(IO2Utils.toByteArray(fetch));
             assertThat(r).isEqualTo("ome fil");
         }
 
@@ -203,7 +204,7 @@ public abstract class BaseStorageTest {
         final Set<ObjectKey> keys = IntStream.range(0, 10)
             .mapToObj(i -> new TestObjectKey(TOPIC_PARTITION_SEGMENT_KEY.value() + i))
             .collect(Collectors.toSet());
-        for (final var key : keys) {
+        for (final ObjectKey key : keys) {
             storage().upload(new ByteArrayInputStream("test".getBytes()), key);
         }
         storage().delete(keys);
@@ -211,7 +212,7 @@ public abstract class BaseStorageTest {
         // Test deletion idempotence.
         assertThatNoException().isThrownBy(() -> storage().delete(keys));
 
-        for (final var key : keys) {
+        for (final ObjectKey key : keys) {
             assertThatThrownBy(() -> storage().fetch(key))
                 .isInstanceOf(KeyNotFoundException.class)
                 .hasMessage("Key " + key.value() + " does not exists in storage " + storage());

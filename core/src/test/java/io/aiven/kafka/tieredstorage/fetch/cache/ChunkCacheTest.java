@@ -23,6 +23,8 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import com.google.common.collect.ImmutableMap;
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
 import org.apache.kafka.server.log.remote.storage.RemoteStorageManager.IndexType;
 
 import io.aiven.kafka.tieredstorage.fetch.ChunkKey;
@@ -124,7 +126,7 @@ class ChunkCacheTest {
 
         @Test
         void noEviction() throws IOException, StorageBackendException {
-            chunkCache.configure(Map.of(
+            chunkCache.configure(ImmutableMap.of(
                 "retention.ms", "-1",
                 "size", "-1"
             ));
@@ -148,7 +150,7 @@ class ChunkCacheTest {
 
         @Test
         void timeBasedEviction() throws IOException, StorageBackendException, InterruptedException {
-            chunkCache.configure(Map.of(
+            chunkCache.configure(ImmutableMap.of(
                 "retention.ms", "100",
                 "size", "-1"
             ));
@@ -185,7 +187,7 @@ class ChunkCacheTest {
 
         @Test
         void sizeBasedEviction() throws IOException, StorageBackendException {
-            chunkCache.configure(Map.of(
+            chunkCache.configure(ImmutableMap.of(
                 "retention.ms", "-1",
                 "size", "18"
             ));
@@ -224,7 +226,7 @@ class ChunkCacheTest {
 
         @Test
         void prefetchingNextChunk() throws Exception {
-            chunkCache.configure(Map.of(
+            chunkCache.configure(ImmutableMap.of(
                 "retention.ms", "-1",
                 "size", "-1",
                 "prefetch.max.size", ORIGINAL_CHUNK_SIZE
@@ -254,7 +256,7 @@ class ChunkCacheTest {
 
         @Test
         void prefetchingWholeSegment() throws Exception {
-            chunkCache.configure(Map.of(
+            chunkCache.configure(ImmutableMap.of(
                 "retention.ms", "-1",
                 "size", "-1",
                 "prefetch.max.size", ORIGINAL_FILE_SIZE - ORIGINAL_CHUNK_SIZE
@@ -283,7 +285,7 @@ class ChunkCacheTest {
 
     @Nested
     class ErrorHandlingTests {
-        private final Map<String, String> configs = Map.of(
+        private final Map<String, String> configs = ImmutableMap.of(
             "retention.ms", "-1",
             "size", "-1"
         );
@@ -359,7 +361,7 @@ class ChunkCacheTest {
                 .pollInterval(Duration.ofMillis(5))
                 .ignoreExceptions()
                 .until(() ->
-                    chunkCache.getChunk(SEGMENT_OBJECT_KEY, SEGMENT_MANIFEST, 0).readAllBytes().length == 1);
+                    IO2Utils.toByteArray(chunkCache.getChunk(SEGMENT_OBJECT_KEY, SEGMENT_MANIFEST, 0)).length == 1);
         }
 
         @Test
@@ -373,7 +375,7 @@ class ChunkCacheTest {
             when(chunkManager.getChunk(eq(SEGMENT_OBJECT_KEY), eq(SEGMENT_MANIFEST), eq(2)))
                 .thenReturn(new ByteArrayInputStream(new byte[1]));
 
-            chunkCache.configure(Map.of(
+            chunkCache.configure(ImmutableMap.of(
                 "retention.ms", "-1",
                 "size", "-1",
                 "prefetch.max.size", ORIGINAL_CHUNK_SIZE
@@ -383,7 +385,7 @@ class ChunkCacheTest {
                 .pollInterval(Duration.ofMillis(5))
                 .ignoreExceptions()
                 .until(() ->
-                    chunkCache.getChunk(SEGMENT_OBJECT_KEY, SEGMENT_MANIFEST, 0).readAllBytes().length == 1);
+                    IO2Utils.toByteArray(chunkCache.getChunk(SEGMENT_OBJECT_KEY, SEGMENT_MANIFEST, 0)).length == 1);
         }
     }
 }

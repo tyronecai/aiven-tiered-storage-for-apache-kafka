@@ -18,6 +18,7 @@ package io.aiven.kafka.tieredstorage.fetch.cache;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.aiven.kafka.tieredstorage.Chunk;
 import org.apache.kafka.common.Configurable;
 
 import io.aiven.kafka.tieredstorage.fetch.ChunkKey;
@@ -72,7 +74,7 @@ public abstract class ChunkCache<T> implements ChunkManager, Configurable {
     public InputStream getChunk(final ObjectKey objectKey,
                                 final SegmentManifest manifest,
                                 final int chunkId) throws StorageBackendException, IOException {
-        final var currentChunk = manifest.chunkIndex().chunks().get(chunkId);
+        final Chunk currentChunk = manifest.chunkIndex().chunks().get(chunkId);
         startPrefetching(objectKey, manifest, currentChunk.originalPosition + currentChunk.originalSize);
         final ChunkKey chunkKey = new ChunkKey(objectKey.value(), chunkId);
         final AtomicReference<InputStream> result = new AtomicReference<>();
@@ -137,7 +139,7 @@ public abstract class ChunkCache<T> implements ChunkManager, Configurable {
         final Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
         config.cacheSize().ifPresent(maximumWeight -> cacheBuilder.maximumWeight(maximumWeight).weigher(weigher()));
         config.cacheRetention().ifPresent(cacheBuilder::expireAfterAccess);
-        final var cache = cacheBuilder.evictionListener(removalListener())
+        final AsyncCache cache = cacheBuilder.evictionListener(removalListener())
             .scheduler(Scheduler.systemScheduler())
             .executor(executor)
             .recordStats(() -> statsCounter)
@@ -156,7 +158,7 @@ public abstract class ChunkCache<T> implements ChunkManager, Configurable {
             } else {
                 prefetchingRange = BytesRange.ofFromPositionAndSize(startPosition, prefetchingSize);
             }
-            final var chunks = segmentManifest.chunkIndex().chunksForRange(prefetchingRange);
+            final List<Chunk> chunks = segmentManifest.chunkIndex().chunksForRange(prefetchingRange);
             chunks.forEach(chunk -> {
                 final ChunkKey chunkKey = new ChunkKey(segmentKey.value(), chunk.id);
                 cache.asMap()

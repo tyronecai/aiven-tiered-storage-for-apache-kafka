@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.io.input.NullInputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -44,19 +45,19 @@ class BaseTransformChunkEnumerationTest {
 
     @Test
     void originalChunkSize() {
-        final var transform = new BaseTransformChunkEnumeration(new ByteArrayInputStream(new byte[1]), 123);
+        final BaseTransformChunkEnumeration transform = new BaseTransformChunkEnumeration(new ByteArrayInputStream(new byte[1]), 123);
         assertThat(transform.originalChunkSize()).isEqualTo(123);
     }
 
     @Test
     void transformedChunkSizeEqualsToOriginal() {
-        final var transform = new BaseTransformChunkEnumeration(new ByteArrayInputStream(new byte[1]), 123);
+        final BaseTransformChunkEnumeration transform = new BaseTransformChunkEnumeration(new ByteArrayInputStream(new byte[1]), 123);
         assertThat(transform.transformedChunkSize()).isEqualTo(transform.originalChunkSize());
     }
 
     @Test
     void emptyInputStream() {
-        final var transform = new BaseTransformChunkEnumeration(InputStream.nullInputStream(), 123);
+        final BaseTransformChunkEnumeration transform = new BaseTransformChunkEnumeration(new NullInputStream(0), 123);
         assertThat(transform.hasMoreElements()).isFalse();
         assertThatThrownBy(transform::nextElement)
             .isInstanceOf(NoSuchElementException.class);
@@ -66,7 +67,7 @@ class BaseTransformChunkEnumerationTest {
     @ValueSource(ints = {10, 100})
     void inOneChunk(final int originalChunkSize) {
         final byte[] data = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        final var transform = new BaseTransformChunkEnumeration(new ByteArrayInputStream(data), originalChunkSize);
+        final BaseTransformChunkEnumeration transform = new BaseTransformChunkEnumeration(new ByteArrayInputStream(data), originalChunkSize);
         assertThat(transform.hasMoreElements()).isTrue();
         assertThat(transform.nextElement()).isEqualTo(data);
 
@@ -78,7 +79,7 @@ class BaseTransformChunkEnumerationTest {
     @Test
     void inManyChunks() {
         final byte[] data = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        final var transform = new BaseTransformChunkEnumeration(new ByteArrayInputStream(data), 3);
+        final BaseTransformChunkEnumeration transform = new BaseTransformChunkEnumeration(new ByteArrayInputStream(data), 3);
         assertThat(transform.hasMoreElements()).isTrue();
         assertThat(transform.nextElement()).isEqualTo(new byte[] {0, 1, 2});
         assertThat(transform.hasMoreElements()).isTrue();

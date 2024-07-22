@@ -17,6 +17,7 @@
 package io.aiven.kafka.tieredstorage.fetch;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 public class ChunkKey {
@@ -26,7 +27,7 @@ public class ChunkKey {
     public ChunkKey(final String objectKeyPath, final int chunkId) {
         Objects.requireNonNull(objectKeyPath, "objectKeyPath cannot be null");
         // get last part of segment path + chunk id, as it's used for creating file names
-        this.segmentFileName = Path.of(objectKeyPath).getFileName().toString();
+        this.segmentFileName = Paths.get(objectKeyPath).getFileName().toString();
         this.chunkId = chunkId;
     }
 

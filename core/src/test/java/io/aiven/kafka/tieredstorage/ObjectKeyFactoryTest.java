@@ -18,6 +18,7 @@ package io.aiven.kafka.tieredstorage;
 
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.TopicIdPartition;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.Uuid;
@@ -37,7 +38,7 @@ class ObjectKeyFactoryTest {
     static final RemoteLogSegmentId REMOTE_LOG_SEGMENT_ID = new RemoteLogSegmentId(TOPIC_ID_PARTITION, SEGMENT_ID);
     static final RemoteLogSegmentMetadata REMOTE_LOG_SEGMENT_METADATA = new RemoteLogSegmentMetadata(
         REMOTE_LOG_SEGMENT_ID, 1234L, 2000L,
-        0, 0, 0, 0, Map.of(0, 0L));
+        0, 0, 0, 0, ImmutableMap.of(0, 0L));
 
     @Test
     void test() {
@@ -59,7 +60,7 @@ class ObjectKeyFactoryTest {
     @Test
     void withCustomFieldsEmpty() {
         final ObjectKeyFactory objectKeyFactory = new ObjectKeyFactory("prefix/", false);
-        final Map<Integer, Object> fields = Map.of();
+        final Map<Integer, Object> fields = ImmutableMap.of();
         assertThat(
             objectKeyFactory.key(fields, REMOTE_LOG_SEGMENT_METADATA, ObjectKeyFactory.Suffix.LOG).value()
         ).isEqualTo(
@@ -80,7 +81,7 @@ class ObjectKeyFactoryTest {
     @Test
     void withCustomFieldsOnlyPrefix() {
         final ObjectKeyFactory objectKeyFactory = new ObjectKeyFactory("prefix/", false);
-        final Map<Integer, Object> fields = Map.of(SegmentCustomMetadataField.OBJECT_PREFIX.index(), "other/");
+        final Map<Integer, Object> fields = ImmutableMap.of(SegmentCustomMetadataField.OBJECT_PREFIX.index(), "other/");
         assertThat(
             objectKeyFactory.key(fields, REMOTE_LOG_SEGMENT_METADATA, ObjectKeyFactory.Suffix.LOG).value()
         ).isEqualTo(
@@ -101,7 +102,7 @@ class ObjectKeyFactoryTest {
     @Test
     void withCustomFieldsOnlyKey() {
         final ObjectKeyFactory objectKeyFactory = new ObjectKeyFactory("prefix/", false);
-        final Map<Integer, Object> fields = Map.of(SegmentCustomMetadataField.OBJECT_KEY.index(), "topic/7/file");
+        final Map<Integer, Object> fields = ImmutableMap.of(SegmentCustomMetadataField.OBJECT_KEY.index(), "topic/7/file");
         assertThat(
             objectKeyFactory.key(fields, REMOTE_LOG_SEGMENT_METADATA, ObjectKeyFactory.Suffix.LOG).value()
         ).isEqualTo("prefix/topic/7/file.log");
@@ -116,7 +117,7 @@ class ObjectKeyFactoryTest {
     @Test
     void withCustomFieldsAll() {
         final ObjectKeyFactory objectKeyFactory = new ObjectKeyFactory("prefix/", false);
-        final Map<Integer, Object> fields = Map.of(
+        final Map<Integer, Object> fields = ImmutableMap.of(
             SegmentCustomMetadataField.OBJECT_PREFIX.index(), "other/",
             SegmentCustomMetadataField.OBJECT_KEY.index(), "topic/7/file");
         assertThat(
@@ -150,7 +151,7 @@ class ObjectKeyFactoryTest {
     @Test
     void prefixMaskingWithCustomFieldsEmpty() {
         final ObjectKeyFactory objectKeyFactory = new ObjectKeyFactory("real-prefix/", true);
-        final Map<Integer, Object> fields = Map.of();
+        final Map<Integer, Object> fields = ImmutableMap.of();
         assertThat(
             objectKeyFactory.key(fields, REMOTE_LOG_SEGMENT_METADATA, ObjectKeyFactory.Suffix.LOG)
         ).hasToString(
@@ -160,7 +161,7 @@ class ObjectKeyFactoryTest {
     @Test
     void prefixMaskingWithCustomFieldsOnlyPrefix() {
         final ObjectKeyFactory objectKeyFactory = new ObjectKeyFactory("real-prefix/", true);
-        final Map<Integer, Object> fields = Map.of(SegmentCustomMetadataField.OBJECT_PREFIX.index(), "other/");
+        final Map<Integer, Object> fields = ImmutableMap.of(SegmentCustomMetadataField.OBJECT_PREFIX.index(), "other/");
         assertThat(
             objectKeyFactory.key(fields, REMOTE_LOG_SEGMENT_METADATA, ObjectKeyFactory.Suffix.LOG)
         ).hasToString(
@@ -170,7 +171,7 @@ class ObjectKeyFactoryTest {
     @Test
     void prefixMaskingWithCustomFieldsOnlyKey() {
         final ObjectKeyFactory objectKeyFactory = new ObjectKeyFactory("real-prefix/", true);
-        final Map<Integer, Object> fields = Map.of(SegmentCustomMetadataField.OBJECT_KEY.index(), "topic/7/file");
+        final Map<Integer, Object> fields = ImmutableMap.of(SegmentCustomMetadataField.OBJECT_KEY.index(), "topic/7/file");
         assertThat(
             objectKeyFactory.key(fields, REMOTE_LOG_SEGMENT_METADATA, ObjectKeyFactory.Suffix.LOG)
         ).hasToString("<prefix>/topic/7/file.log");
@@ -179,7 +180,7 @@ class ObjectKeyFactoryTest {
     @Test
     void prefixMaskingWithCustomFieldsAll() {
         final ObjectKeyFactory objectKeyFactory = new ObjectKeyFactory("real-prefix/", true);
-        final Map<Integer, Object> fields = Map.of(
+        final Map<Integer, Object> fields = ImmutableMap.of(
             SegmentCustomMetadataField.OBJECT_PREFIX.index(), "other/",
             SegmentCustomMetadataField.OBJECT_KEY.index(), "topic/7/file");
         assertThat(

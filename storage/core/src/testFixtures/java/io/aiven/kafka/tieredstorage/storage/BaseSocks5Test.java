@@ -22,6 +22,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -60,7 +61,7 @@ public abstract class BaseSocks5Test<T extends StorageBackend> {
         storage.configure(storageConfigForAuthenticatedProxy());
 
         storage.upload(new ByteArrayInputStream(TEST_DATA), OBJECT_KEY);
-        assertThat(storage.fetch(OBJECT_KEY).readAllBytes()).isEqualTo(TEST_DATA);
+        assertThat(IO2Utils.toByteArray(storage.fetch(OBJECT_KEY))).isEqualTo(TEST_DATA);
     }
 
     protected abstract Map<String, Object> storageConfigForAuthenticatedProxy();
@@ -72,7 +73,7 @@ public abstract class BaseSocks5Test<T extends StorageBackend> {
         storage.configure(storageConfigForUnauthenticatedProxy());
 
         storage.upload(new ByteArrayInputStream(TEST_DATA), OBJECT_KEY);
-        assertThat(storage.fetch(OBJECT_KEY).readAllBytes()).isEqualTo(TEST_DATA);
+        assertThat(IO2Utils.toByteArray(storage.fetch(OBJECT_KEY))).isEqualTo(TEST_DATA);
     }
 
     protected abstract Map<String, Object> storageConfigForUnauthenticatedProxy();

@@ -60,14 +60,14 @@ public class FixedSizeChunkIndexBuilderTest extends ChunkIndexBuilderCommonTest 
         [101-202) - size 101  |  [111-222) - size 111
         [202-253) - size 51   |  [222-304) - size 82
         */
-        final var builder = new FixedSizeChunkIndexBuilder(101, 253, 111);
+        final FixedSizeChunkIndexBuilder builder = new FixedSizeChunkIndexBuilder(101, 253, 111);
         builder.addChunk(111);
         builder.addChunk(111);
         final ChunkIndex index = builder.finish(81);
 
-        final var transformedChunk1 = new Chunk(0, 0, 101, 0, 111);
-        final var transformedChunk2 = new Chunk(1, 101, 101, 111, 111);
-        final var transformedChunk3 = new Chunk(2, 202, 51, 222, 81);
+        final Chunk transformedChunk1 = new Chunk(0, 0, 101, 0, 111);
+        final Chunk transformedChunk2 = new Chunk(1, 101, 101, 111, 111);
+        final Chunk transformedChunk3 = new Chunk(2, 202, 51, 222, 81);
 
         assertThat(index.chunks()).containsExactly(transformedChunk1, transformedChunk2, transformedChunk3);
 

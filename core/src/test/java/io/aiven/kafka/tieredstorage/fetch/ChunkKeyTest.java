@@ -28,8 +28,8 @@ class ChunkKeyTest {
 
     @Test
     void identical() {
-        final var ck1 = new ChunkKey(UUID_1, 0);
-        final var ck2 = new ChunkKey(UUID_1, 0);
+        final ChunkKey ck1 = new ChunkKey(UUID_1, 0);
+        final ChunkKey ck2 = new ChunkKey(UUID_1, 0);
         assertThat(ck1).isEqualTo(ck2);
         assertThat(ck2).isEqualTo(ck1);
         assertThat(ck1).hasSameHashCodeAs(ck2);
@@ -37,8 +37,8 @@ class ChunkKeyTest {
 
     @Test
     void differentUuid() {
-        final var ck1 = new ChunkKey(UUID_1, 0);
-        final var ck2 = new ChunkKey(UUID_2, 0);
+        final ChunkKey ck1 = new ChunkKey(UUID_1, 0);
+        final ChunkKey ck2 = new ChunkKey(UUID_2, 0);
         assertThat(ck1).isNotEqualTo(ck2);
         assertThat(ck2).isNotEqualTo(ck1);
         assertThat(ck1).doesNotHaveSameHashCodeAs(ck2);
@@ -46,8 +46,8 @@ class ChunkKeyTest {
 
     @Test
     void differentChunkIds() {
-        final var ck1 = new ChunkKey(UUID_1, 0);
-        final var ck2 = new ChunkKey(UUID_1, 1);
+        final ChunkKey ck1 = new ChunkKey(UUID_1, 0);
+        final ChunkKey ck2 = new ChunkKey(UUID_1, 1);
         assertThat(ck1).isNotEqualTo(ck2);
         assertThat(ck2).isNotEqualTo(ck1);
         assertThat(ck1).doesNotHaveSameHashCodeAs(ck2);

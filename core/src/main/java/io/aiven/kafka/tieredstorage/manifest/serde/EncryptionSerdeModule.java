@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public final class EncryptionSerdeModule {
     public static Module create(final RsaEncryptionProvider rsaEncryptionProvider) {
-        final var module = new SimpleModule();
+        final SimpleModule module = new SimpleModule();
 
         module.addSerializer(SecretKey.class,
             new DataKeySerializer(rsaEncryptionProvider::encryptDataKey));

@@ -19,6 +19,7 @@ package io.aiven.kafka.tieredstorage.fetch.cache;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.apache.kafka.common.config.ConfigDef;
@@ -48,7 +49,7 @@ public class DiskChunkCacheConfig extends ChunkCacheConfig {
 
     public DiskChunkCacheConfig(final Map<String, ?> props) {
         super(configDef(), props);
-        final var baseCachePath = baseCachePath();
+        final Path baseCachePath = baseCachePath();
         if (!Files.isDirectory(baseCachePath) || !Files.isWritable(baseCachePath)) {
             throw new ConfigException(CACHE_PATH_CONFIG, baseCachePath,
                 baseCachePath + " must exists and be a writable directory");
@@ -59,7 +60,7 @@ public class DiskChunkCacheConfig extends ChunkCacheConfig {
     }
 
     private void resetCacheDirectory() {
-        final var baseCachePath = baseCachePath();
+        final Path baseCachePath = baseCachePath();
         try {
             FileUtils.cleanDirectory(baseCachePath.toFile());
             Files.createDirectories(cachePath());
@@ -72,7 +73,7 @@ public class DiskChunkCacheConfig extends ChunkCacheConfig {
     }
 
     final Path baseCachePath() {
-        return Path.of(getString(CACHE_PATH_CONFIG));
+        return Paths.get(getString(CACHE_PATH_CONFIG));
     }
 
     final Path cachePath() {

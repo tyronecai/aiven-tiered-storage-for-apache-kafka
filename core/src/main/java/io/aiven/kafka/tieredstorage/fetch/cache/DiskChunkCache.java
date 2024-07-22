@@ -18,10 +18,12 @@ package io.aiven.kafka.tieredstorage.fetch.cache;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
 import org.apache.kafka.common.utils.Time;
 
 import io.aiven.kafka.tieredstorage.fetch.ChunkKey;
@@ -67,7 +69,7 @@ public class DiskChunkCache extends ChunkCache<Path> {
      */
     @Override
     public Path cacheChunk(final ChunkKey chunkKey, final InputStream chunk) throws IOException {
-        final var chunkKeyPath = chunkKey.path();
+        final String chunkKeyPath = chunkKey.path();
         final Path tempChunkPath = config.tempCachePath().resolve(chunkKeyPath);
         final Path tempCached = writeToDisk(chunk, tempChunkPath);
         log.trace("Chunk file has been stored to temporary caching directory {}", tempCached);
@@ -86,8 +88,8 @@ public class DiskChunkCache extends ChunkCache<Path> {
     }
 
     private Path writeToDisk(final InputStream chunk, final Path tempChunkPath) throws IOException {
-        try (chunk; final var out = Files.newOutputStream(tempChunkPath)) {
-            final long bytesTransferred = chunk.transferTo(out);
+        try (final OutputStream out = Files.newOutputStream(tempChunkPath)) {
+            final long bytesTransferred = IO2Utils.transferTo(chunk, out);
             metrics.chunkWritten(bytesTransferred);
         }
         return tempChunkPath;
@@ -116,9 +118,10 @@ public class DiskChunkCache extends ChunkCache<Path> {
 
     @Override
     public Weigher<ChunkKey, Path> weigher() {
+        // 不能超过 2GB
         return (key, value) -> {
             try {
-                final var fileSize = Files.size(value);
+                final long fileSize = Files.size(value);
                 if (fileSize <= Integer.MAX_VALUE) {
                     return (int) fileSize;
                 } else {

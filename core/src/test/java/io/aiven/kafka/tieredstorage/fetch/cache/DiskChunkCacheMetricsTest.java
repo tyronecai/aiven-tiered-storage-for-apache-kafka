@@ -28,6 +28,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.metrics.MetricConfig;
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.server.log.remote.storage.RemoteStorageManager;
@@ -87,14 +88,14 @@ class DiskChunkCacheMetricsTest {
             .thenReturn(new ByteArrayInputStream(new byte[size2]));
 
         final DiskChunkCache diskChunkCache = new DiskChunkCache(chunkManager, time);
-        diskChunkCache.configure(Map.of(
+        diskChunkCache.configure(ImmutableMap.of(
             "size", size1,  // enough to put the first, but not both
             "path", baseCachePath.toString()
         ));
 
         diskChunkCache.getChunk(OBJECT_KEY_PATH, SEGMENT_MANIFEST, 0);
 
-        final var objectName = new ObjectName("aiven.kafka.server.tieredstorage.cache:type=disk-chunk-cache-metrics");
+        final ObjectName objectName = new ObjectName("aiven.kafka.server.tieredstorage.cache:type=disk-chunk-cache-metrics");
 
         assertThat(MBEAN_SERVER.getAttribute(objectName, "write-total"))
             .isEqualTo(1.0);

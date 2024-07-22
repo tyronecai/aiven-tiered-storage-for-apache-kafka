@@ -25,8 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ChunkEqualsTest {
     @Test
     void identical() {
-        final var c1 = new Chunk(0, 20, 30, 100, 120);
-        final var c2 = new Chunk(0, 20, 30, 100, 120);
+        final Chunk c1 = new Chunk(0, 20, 30, 100, 120);
+        final Chunk c2 = new Chunk(0, 20, 30, 100, 120);
         assertThat(c1).isEqualTo(c2);
         assertThat(c2).isEqualTo(c1);
         assertThat(c1).hasSameHashCodeAs(c2);
@@ -34,8 +34,8 @@ public class ChunkEqualsTest {
 
     @Test
     void differentIndex() {
-        final var c1 = new Chunk(0, 20, 30, 100, 120);
-        final var c2 = new Chunk(1, 20, 30, 100, 120);
+        final Chunk c1 = new Chunk(0, 20, 30, 100, 120);
+        final Chunk c2 = new Chunk(1, 20, 30, 100, 120);
         assertThat(c1).isNotEqualTo(c2);
         assertThat(c2).isNotEqualTo(c1);
         assertThat(c1).doesNotHaveSameHashCodeAs(c2);
@@ -43,8 +43,8 @@ public class ChunkEqualsTest {
 
     @Test
     void differentOriginalPosition() {
-        final var c1 = new Chunk(0, 20, 30, 100, 120);
-        final var c2 = new Chunk(0, 21, 30, 100, 120);
+        final Chunk c1 = new Chunk(0, 20, 30, 100, 120);
+        final Chunk c2 = new Chunk(0, 21, 30, 100, 120);
         assertThat(c1).isNotEqualTo(c2);
         assertThat(c2).isNotEqualTo(c1);
         assertThat(c1).doesNotHaveSameHashCodeAs(c2);
@@ -52,8 +52,8 @@ public class ChunkEqualsTest {
 
     @Test
     void differentOriginalSize() {
-        final var c1 = new Chunk(0, 20, 30, 100, 120);
-        final var c2 = new Chunk(0, 20, 31, 100, 120);
+        final Chunk c1 = new Chunk(0, 20, 30, 100, 120);
+        final Chunk c2 = new Chunk(0, 20, 31, 100, 120);
         assertThat(c1).isNotEqualTo(c2);
         assertThat(c2).isNotEqualTo(c1);
         assertThat(c1).doesNotHaveSameHashCodeAs(c2);
@@ -61,8 +61,8 @@ public class ChunkEqualsTest {
 
     @Test
     void differentTransformedPosition() {
-        final var c1 = new Chunk(0, 20, 30, 100, 120);
-        final var c2 = new Chunk(0, 20, 30, 101, 120);
+        final Chunk c1 = new Chunk(0, 20, 30, 100, 120);
+        final Chunk c2 = new Chunk(0, 20, 30, 101, 120);
         assertThat(c1).isNotEqualTo(c2);
         assertThat(c2).isNotEqualTo(c1);
         assertThat(c1).doesNotHaveSameHashCodeAs(c2);
@@ -70,8 +70,8 @@ public class ChunkEqualsTest {
 
     @Test
     void differentTransformedSize() {
-        final var c1 = new Chunk(0, 20, 30, 100, 120);
-        final var c2 = new Chunk(0, 20, 30, 100, 121);
+        final Chunk c1 = new Chunk(0, 20, 30, 100, 120);
+        final Chunk c2 = new Chunk(0, 20, 30, 100, 121);
         assertThat(c1).isNotEqualTo(c2);
         assertThat(c2).isNotEqualTo(c1);
         assertThat(c1).doesNotHaveSameHashCodeAs(c2);

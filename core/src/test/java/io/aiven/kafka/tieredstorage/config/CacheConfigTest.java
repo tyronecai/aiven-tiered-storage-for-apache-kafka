@@ -19,6 +19,7 @@ package io.aiven.kafka.tieredstorage.config;
 import java.time.Duration;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.config.ConfigException;
 
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class CacheConfigTest {
 
     @Test
     void cacheUnboundedSize() {
-        final CacheConfig config = CacheConfig.newBuilder(Map.of("size", "-1")).build();
+        final CacheConfig config = CacheConfig.newBuilder(ImmutableMap.of("size", "-1")).build();
 
         assertThat(config.cacheSize()).isNotPresent();
         assertThat(config.cacheRetention()).hasValue(Duration.ofMinutes(10));
@@ -38,7 +39,7 @@ class CacheConfigTest {
 
     @Test
     void cacheUnboundedWithDefaultSize() {
-        final CacheConfig config = CacheConfig.newBuilder(Map.of())
+        final CacheConfig config = CacheConfig.newBuilder(ImmutableMap.of())
             .withDefaultSize(-1L)
             .build();
 
@@ -48,13 +49,13 @@ class CacheConfigTest {
 
     @Test
     void cacheSizeBounded() {
-        final CacheConfig config = CacheConfig.newBuilder(Map.of("size", "1024")).build();
+        final CacheConfig config = CacheConfig.newBuilder(ImmutableMap.of("size", "1024")).build();
         assertThat(config.cacheSize()).hasValue(1024L);
     }
 
     @Test
     void cacheSizeBoundedWithDefaultSize() {
-        final CacheConfig config = CacheConfig.newBuilder(Map.of())
+        final CacheConfig config = CacheConfig.newBuilder(ImmutableMap.of())
             .withDefaultSize(1024L)
             .build();
         assertThat(config.cacheSize()).hasValue(1024L);
@@ -62,25 +63,25 @@ class CacheConfigTest {
 
     @Test
     void invalidCacheSize() {
-        assertThatThrownBy(() -> CacheConfig.newBuilder(Map.of("size", "-2")).build())
+        assertThatThrownBy(() -> CacheConfig.newBuilder(ImmutableMap.of("size", "-2")).build())
             .isInstanceOf(ConfigException.class)
             .hasMessage("Invalid value -2 for configuration size: Value must be at least -1");
 
-        assertThatThrownBy(() -> CacheConfig.newBuilder(Map.of()).withDefaultSize(-2L).build())
+        assertThatThrownBy(() -> CacheConfig.newBuilder(ImmutableMap.of()).withDefaultSize(-2L).build())
             .isInstanceOf(ConfigException.class)
             .hasMessage("Invalid value -2 for configuration size: Value must be at least -1");
     }
 
     @Test
     void cacheSizeUnspecified() {
-        assertThatThrownBy(() -> CacheConfig.newBuilder(Map.of()).build())
+        assertThatThrownBy(() -> CacheConfig.newBuilder(ImmutableMap.of()).build())
             .isInstanceOf(ConfigException.class)
             .hasMessage("Missing required configuration \"size\" which has no default value.");
     }
 
     @Test
     void cacheRetentionForever() {
-        final Map<String, String> configs = Map.of(
+        final Map<String, String> configs = ImmutableMap.of(
             "retention.ms", "-1",
             "size", "-1"
         );
@@ -92,7 +93,7 @@ class CacheConfigTest {
 
     @Test
     void cacheRetentionLimited() {
-        final Map<String, String> configs = Map.of(
+        final Map<String, String> configs = ImmutableMap.of(
             "retention.ms", "60000",
             "size", "-1"
         );
@@ -102,7 +103,7 @@ class CacheConfigTest {
 
     @Test
     void invalidRetention() {
-        final Map<String, String> configs = Map.of(
+        final Map<String, String> configs = ImmutableMap.of(
             "retention.ms", "-2",
             "size", "-1"
         );

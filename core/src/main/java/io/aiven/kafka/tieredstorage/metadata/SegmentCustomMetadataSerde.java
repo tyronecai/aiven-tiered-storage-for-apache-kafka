@@ -38,10 +38,10 @@ public class SegmentCustomMetadataSerde {
             return new byte[] {};
         }
 
-        final var struct = new Struct(CUSTOM_METADATA_SCHEMA);
+        final Struct struct = new Struct(CUSTOM_METADATA_SCHEMA);
         struct.set(TAGGED_FIELD_NAME, data);
 
-        final var buf = ByteBuffer.allocate(struct.sizeOf());
+        final ByteBuffer buf = ByteBuffer.allocate(struct.sizeOf());
         struct.writeTo(buf);
         return buf.array();
     }
@@ -51,10 +51,10 @@ public class SegmentCustomMetadataSerde {
             return new TreeMap<>();
         }
 
-        final var buf = ByteBuffer.wrap(data);
-        final var struct = CUSTOM_METADATA_SCHEMA.read(buf);
+        final ByteBuffer buf = ByteBuffer.wrap(data);
+        final Struct struct = CUSTOM_METADATA_SCHEMA.read(buf);
 
-        @SuppressWarnings("unchecked") final var fields =
+        @SuppressWarnings("unchecked") final NavigableMap<Integer, Object> fields =
             (NavigableMap<Integer, Object>) struct.get(TAGGED_FIELD_NAME);
         return fields;
     }

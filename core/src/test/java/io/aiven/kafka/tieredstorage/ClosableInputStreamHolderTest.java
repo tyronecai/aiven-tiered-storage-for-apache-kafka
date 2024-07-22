@@ -31,7 +31,7 @@ class ClosableInputStreamHolderTest {
         final InputStream is1 = mock(InputStream.class);
         final InputStream is2 = mock(InputStream.class);
         final InputStream is3 = mock(InputStream.class);
-        try (final var holder = new ClosableInputStreamHolder()) {
+        try (final ClosableInputStreamHolder holder = new ClosableInputStreamHolder()) {
             holder.add(is1);
             holder.add(is2);
             holder.add(is3);
@@ -48,7 +48,7 @@ class ClosableInputStreamHolderTest {
         doThrow(new IOException("test")).when(is2).close();
         final InputStream is3 = mock(InputStream.class);
 
-        try (final var holder = new ClosableInputStreamHolder()) {
+        try (final ClosableInputStreamHolder holder = new ClosableInputStreamHolder()) {
             holder.add(is1);
             holder.add(is2);
             holder.add(is3);

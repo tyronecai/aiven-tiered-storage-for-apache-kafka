@@ -16,6 +16,8 @@
 
 package io.aiven.kafka.tieredstorage.transform;
 
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.NoSuchElementException;
@@ -73,7 +75,7 @@ public class BaseTransformChunkEnumeration implements TransformChunkEnumeration 
             throw new NoSuchElementException();
         }
 
-        final var result = chunk;
+        final byte[] result = chunk;
         chunk = null;
         return result;
     }
@@ -85,9 +87,9 @@ public class BaseTransformChunkEnumeration implements TransformChunkEnumeration 
 
         try {
             if (originalChunkSize != 0) {
-                chunk = inputStream.readNBytes(originalChunkSize);
+                chunk = IO2Utils.readNBytes(inputStream, originalChunkSize);
             } else {
-                chunk = inputStream.readAllBytes();
+                chunk = IO2Utils.toByteArray(inputStream);
             }
         } catch (final IOException e) {
             throw new RuntimeException(e);

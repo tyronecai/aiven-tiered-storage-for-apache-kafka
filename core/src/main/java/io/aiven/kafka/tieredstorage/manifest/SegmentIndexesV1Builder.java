@@ -39,7 +39,7 @@ public class SegmentIndexesV1Builder {
 
     // for testing and logging purposes
     public List<IndexType> indexes() {
-        final var indexTypes = new ArrayList<>(indexes.keySet());
+        final List<IndexType> indexTypes = new ArrayList<>(indexes.keySet());
         Collections.sort(indexTypes);
         return indexTypes;
     }

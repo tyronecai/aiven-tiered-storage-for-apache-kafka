@@ -20,25 +20,21 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import io.aiven.kafka.tieredstorage.manifest.SegmentIndexesV1;
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
+import org.apache.commons.io.input.NullInputStream;
 import org.apache.kafka.common.TopicIdPartition;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.Uuid;
@@ -114,7 +110,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
     static final long START_OFFSET = 23L;
     static final RemoteLogSegmentMetadata REMOTE_LOG_METADATA = new RemoteLogSegmentMetadata(
         REMOTE_SEGMENT_ID, START_OFFSET, 2000L,
-        0, 0, 0, SEGMENT_SIZE, Map.of(0, 0L));
+        0, 0, 0, SEGMENT_SIZE, ImmutableMap.of(0, 0L));
     static final String TARGET_LOG_FILE =
         "test/topic-AAAAAAAAAAAAAAAAAAAAAQ/7/00000000000000000023-AAAAAAAAAAAAAAAAAAAAAA.log";
     static final String TARGET_MANIFEST_FILE =
@@ -124,13 +120,13 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
 
     private static List<Arguments> provideEndToEnd() {
         final List<Arguments> result = new ArrayList<>();
-        final var cacheNames =
-            List.of(MemoryChunkCache.class.getCanonicalName(), DiskChunkCache.class.getCanonicalName());
+        final List<String> cacheNames =
+            ImmutableList.of(MemoryChunkCache.class.getCanonicalName(), DiskChunkCache.class.getCanonicalName());
         for (final String cacheClass : cacheNames) {
-            for (final int chunkSize : List.of(1024 * 1024 - 1, 1024 * 1024 * 1024 - 1, Integer.MAX_VALUE / 2)) {
-                for (final boolean compression : List.of(true, false)) {
-                    for (final boolean encryption : List.of(true, false)) {
-                        for (final boolean hasTxnIndex : List.of(true, false)) {
+            for (final int chunkSize : ImmutableList.of(1024 * 1024 - 1, 1024 * 1024 * 1024 - 1, Integer.MAX_VALUE / 2)) {
+                for (final boolean compression : ImmutableList.of(true, false)) {
+                    for (final boolean encryption : ImmutableList.of(true, false)) {
+                        for (final boolean hasTxnIndex : ImmutableList.of(true, false)) {
                             result.add(Arguments.of(cacheClass, chunkSize, compression, encryption, hasTxnIndex));
                         }
                     }
@@ -147,25 +143,25 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
         rsaEncryptionProvider = new RsaEncryptionProvider(KEY_ENCRYPTION_KEY_ID, keyRing);
         aesEncryptionProvider = new AesEncryptionProvider();
 
-        sourceDir = Path.of(tmpDir.toString(), "source");
+        sourceDir = Paths.get(tmpDir.toString(), "source");
         Files.createDirectories(sourceDir);
 
-        logFilePath = Path.of(sourceDir.toString(), "00000000000000000023.log");
+        logFilePath = Paths.get(sourceDir.toString(), "00000000000000000023.log");
         createRandomFilledFile(logFilePath, SEGMENT_SIZE);
 
-        offsetIndexFilePath = Path.of(sourceDir.toString(), "00000000000000000023.index");
+        offsetIndexFilePath = Paths.get(sourceDir.toString(), "00000000000000000023.index");
         createRandomFilledFile(offsetIndexFilePath, 256 * 1024);
 
-        timeIndexFilePath = Path.of(sourceDir.toString(), "00000000000000000023.timeindex");
+        timeIndexFilePath = Paths.get(sourceDir.toString(), "00000000000000000023.timeindex");
         createRandomFilledFile(timeIndexFilePath, 256 * 1024);
 
-        producerSnapshotFilePath = Path.of(sourceDir.toString(), "00000000000000000023.snapshot");
+        producerSnapshotFilePath = Paths.get(sourceDir.toString(), "00000000000000000023.snapshot");
         createRandomFilledFile(producerSnapshotFilePath, 4 * 1024);
 
-        txnIndexFilePath = Path.of(sourceDir.toString(), "00000000000000000023.txnindex");
+        txnIndexFilePath = Paths.get(sourceDir.toString(), "00000000000000000023.txnindex");
         createRandomFilledFile(txnIndexFilePath, 128 * 1024);
 
-        targetDir = Path.of(tmpDir.toString(), "target/");
+        targetDir = Paths.get(tmpDir.toString(), "target/");
         Files.createDirectories(targetDir);
     }
 
@@ -178,9 +174,9 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
             unit /= 2;
         }
 
-        final var random = new Random();
+        final Random random = new Random();
         final byte[] buf = new byte[unit];
-        try (final var outputStream = Files.newOutputStream(path)) {
+        try (final OutputStream outputStream = Files.newOutputStream(path)) {
             for (int i = 0; i < size / unit; i++) {
                 random.nextBytes(buf);
                 outputStream.write(buf);
@@ -197,9 +193,9 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
         final boolean encryption,
         final boolean hasTxnIndex) throws RemoteStorageException, IOException {
         // Configure the RSM.
-        final var cacheDir = tmpDir.resolve("cache");
+        final Path cacheDir = tmpDir.resolve("cache");
         Files.createDirectories(cacheDir);
-        final Map<String, String> config = new HashMap<>(Map.of(
+        final Map<String, String> config = new HashMap<>(ImmutableMap.of(
             "chunk.size", Integer.toString(chunkSize),
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "key.prefix", "test/",
@@ -227,7 +223,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
             logFilePath, offsetIndexFilePath, timeIndexFilePath, txnIndexPath,
             producerSnapshotFilePath, ByteBuffer.wrap(LEADER_EPOCH_INDEX_BYTES));
         final Optional<RemoteLogSegmentMetadata.CustomMetadata> customMetadata;
-        try (final var checker = new AllOpenedFileInputStreamsAreClosedChecker()) {
+        try (final AllOpenedFileInputStreamsAreClosedChecker checker = new AllOpenedFileInputStreamsAreClosedChecker()) {
             customMetadata = rsm.copyLogSegmentData(REMOTE_LOG_METADATA, logSegmentData);
         }
         assertThat(customMetadata).isPresent();
@@ -243,7 +239,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
     }
 
     private void checkCustomMetadata(final RemoteLogSegmentMetadata.CustomMetadata customMetadata) {
-        final var fields = CUSTOM_METADATA_SERDE.deserialize(customMetadata.value());
+        final NavigableMap<Integer, Object> fields = CUSTOM_METADATA_SERDE.deserialize(customMetadata.value());
         assertThat(fields).hasSize(3);
         assertThat(fields.get(SegmentCustomMetadataField.REMOTE_SIZE.index()))
             .asInstanceOf(InstanceOfAssertFactories.LONG)
@@ -257,7 +253,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
     }
 
     private void checkFilesInTargetDirectory() {
-        final List<String> expectedFiles = new ArrayList<>(List.of(
+        final List<String> expectedFiles = new ArrayList<>(ImmutableList.of(
             TARGET_LOG_FILE,
             "topic-AAAAAAAAAAAAAAAAAAAAAQ/7/00000000000000000023-AAAAAAAAAAAAAAAAAAAAAA.indexes",
             TARGET_MANIFEST_FILE
@@ -296,30 +292,30 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
     }
 
     private void checkIndexContents(final boolean hasTxnIndex) throws IOException, RemoteStorageException {
-        try (final var inputStream = rsm.fetchIndex(REMOTE_LOG_METADATA,
+        try (final InputStream inputStream = rsm.fetchIndex(REMOTE_LOG_METADATA,
             org.apache.kafka.server.log.remote.storage.RemoteStorageManager.IndexType.OFFSET)) {
-            assertThat(inputStream.readAllBytes())
+            assertThat(IO2Utils.toByteArray(inputStream))
                 .isEqualTo(Files.readAllBytes(offsetIndexFilePath));
         }
-        try (final var inputStream = rsm.fetchIndex(REMOTE_LOG_METADATA,
+        try (final InputStream inputStream = rsm.fetchIndex(REMOTE_LOG_METADATA,
             org.apache.kafka.server.log.remote.storage.RemoteStorageManager.IndexType.TIMESTAMP)) {
-            assertThat(inputStream.readAllBytes())
+            assertThat(IO2Utils.toByteArray(inputStream))
                 .isEqualTo(Files.readAllBytes(timeIndexFilePath));
         }
-        try (final var inputStream = rsm.fetchIndex(REMOTE_LOG_METADATA,
+        try (final InputStream inputStream = rsm.fetchIndex(REMOTE_LOG_METADATA,
             org.apache.kafka.server.log.remote.storage.RemoteStorageManager.IndexType.PRODUCER_SNAPSHOT)) {
-            assertThat(inputStream.readAllBytes())
+            assertThat(IO2Utils.toByteArray(inputStream))
                 .isEqualTo(Files.readAllBytes(producerSnapshotFilePath));
         }
-        try (final var inputStream = rsm.fetchIndex(REMOTE_LOG_METADATA,
+        try (final InputStream inputStream = rsm.fetchIndex(REMOTE_LOG_METADATA,
             org.apache.kafka.server.log.remote.storage.RemoteStorageManager.IndexType.LEADER_EPOCH)) {
-            assertThat(inputStream.readAllBytes())
+            assertThat(IO2Utils.toByteArray(inputStream))
                 .isEqualTo(LEADER_EPOCH_INDEX_BYTES);
         }
         if (hasTxnIndex) {
-            try (final var inputStream = rsm.fetchIndex(REMOTE_LOG_METADATA,
+            try (final InputStream inputStream = rsm.fetchIndex(REMOTE_LOG_METADATA,
                 org.apache.kafka.server.log.remote.storage.RemoteStorageManager.IndexType.TRANSACTION)) {
-                assertThat(inputStream.readAllBytes())
+                assertThat(IO2Utils.toByteArray(inputStream))
                     .isEqualTo(Files.readAllBytes(txnIndexFilePath));
             }
         }
@@ -351,8 +347,8 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
         try (final InputStream originalInputStream = Files.newInputStream(logFilePath);
              final InputStream transformedInputStream = Files.newInputStream(targetDir.resolve(TARGET_LOG_FILE))) {
             for (final Chunk chunk : chunkIndex.chunks()) {
-                final byte[] originalChunk = originalInputStream.readNBytes(chunk.originalSize);
-                final byte[] transformedChunk = transformedInputStream.readNBytes(chunk.transformedSize);
+                final byte[] originalChunk = IO2Utils.readNBytes(originalInputStream, chunk.originalSize);
+                final byte[] transformedChunk = IO2Utils.readNBytes(transformedInputStream, chunk.transformedSize);
                 byte[] detransformedChunk;
                 try {
                     final DataKeyAndAAD dataKeyAndAAD = aesEncryptionProvider.createDataKeyAndAAD();
@@ -390,7 +386,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
 
         final int actualChunkSize = (int) Math.min(chunkSize, Files.size(logFilePath) - 2);
         // TODO more combinations?
-        for (final int readSize : List.of(
+        for (final int readSize : ImmutableList.of(
             1,
             13,
             actualChunkSize / 2,
@@ -399,7 +395,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
             actualChunkSize * 2
         )) {
             final byte[] expectedBytes = new byte[readSize];
-            for (final int offset : List.of(
+            for (final int offset : ImmutableList.of(
                 0,
                 1,
                 23,
@@ -415,7 +411,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
                 }
                 final int inclusiveEndPosition = offset + readSize - 1;
                 try (InputStream actual = rsm.fetchLogSegment(REMOTE_LOG_METADATA, offset, inclusiveEndPosition)) {
-                    assertThat(actual.readAllBytes())
+                    assertThat(IO2Utils.toByteArray(actual))
                         .isEqualTo(Arrays.copyOfRange(expectedBytes, 0, read));
                 }
             }
@@ -446,7 +442,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
 
         // Configure the RSM.
         final int chunkSize = 1024 * 1024;
-        final Map<String, ?> config = new HashMap<>(Map.of(
+        final Map<String, ?> config = new HashMap<>(ImmutableMap.of(
             "chunk.size", Integer.toString(chunkSize),
             "storage.backend.class",
             "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
@@ -473,7 +469,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testTransformingIndexes(final boolean encryption) {
-        final var config = new HashMap<>(Map.of(
+        final HashMap<String, String> config = new HashMap<>(ImmutableMap.of(
             "chunk.size", "10",
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "storage.root", targetDir.toString(),
@@ -485,16 +481,16 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
             config.put("encryption.key.pairs", KEY_ENCRYPTION_KEY_ID);
             config.put("encryption.key.pairs." + KEY_ENCRYPTION_KEY_ID + ".public.key.file", publicKeyPem.toString());
             config.put("encryption.key.pairs." + KEY_ENCRYPTION_KEY_ID + ".private.key.file", privateKeyPem.toString());
-            final var dataKeyAndAAD = aesEncryptionProvider.createDataKeyAndAAD();
+            final DataKeyAndAAD dataKeyAndAAD = aesEncryptionProvider.createDataKeyAndAAD();
             encryptionMetadata = new SegmentEncryptionMetadataV1(dataKeyAndAAD.dataKey, dataKeyAndAAD.aad);
         } else {
             encryptionMetadata = null;
         }
         rsm.configure(config);
 
-        final var segmentIndexBuilder = new SegmentIndexesV1Builder();
-        final var bytes = "test".getBytes();
-        final var is = rsm.transformIndex(
+        final SegmentIndexesV1Builder segmentIndexBuilder = new SegmentIndexesV1Builder();
+        final byte[] bytes = "test".getBytes();
+        final InputStream is = rsm.transformIndex(
             IndexType.OFFSET,
             new ByteArrayInputStream(bytes),
             bytes.length,
@@ -527,7 +523,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
             encryptionMetadata,
             segmentIndexBuilder
         );
-        final var index = segmentIndexBuilder.build();
+        final SegmentIndexesV1 index = segmentIndexBuilder.build();
         assertThat(index.offset().size()).isGreaterThan(0);
         assertThat(index.timestamp().size()).isGreaterThan(0);
         assertThat(index.leaderEpoch().size()).isGreaterThan(0);
@@ -538,7 +534,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testTransformingEmptyIndexes(final boolean encryption) {
-        final var config = new HashMap<>(Map.of(
+        final Map<String, String> config = new HashMap<>(ImmutableMap.of(
             "chunk.size", "10",
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "storage.root", targetDir.toString(),
@@ -550,15 +546,15 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
             config.put("encryption.key.pairs", KEY_ENCRYPTION_KEY_ID);
             config.put("encryption.key.pairs." + KEY_ENCRYPTION_KEY_ID + ".public.key.file", publicKeyPem.toString());
             config.put("encryption.key.pairs." + KEY_ENCRYPTION_KEY_ID + ".private.key.file", privateKeyPem.toString());
-            final var dataKeyAndAAD = aesEncryptionProvider.createDataKeyAndAAD();
+            final DataKeyAndAAD dataKeyAndAAD = aesEncryptionProvider.createDataKeyAndAAD();
             encryptionMetadata = new SegmentEncryptionMetadataV1(dataKeyAndAAD.dataKey, dataKeyAndAAD.aad);
         }
         rsm.configure(config);
 
-        final var segmentIndexBuilder = new SegmentIndexesV1Builder();
-        final var is = rsm.transformIndex(
+        final SegmentIndexesV1Builder segmentIndexBuilder = new SegmentIndexesV1Builder();
+        final InputStream is = rsm.transformIndex(
             IndexType.OFFSET,
-            InputStream.nullInputStream(),
+            new NullInputStream(0),
             0,
             encryptionMetadata,
             segmentIndexBuilder
@@ -569,26 +565,26 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
         // adding required indexes to test builder
         rsm.transformIndex(
             IndexType.TIMESTAMP,
-            InputStream.nullInputStream(),
+            new NullInputStream(0),
             0,
             encryptionMetadata,
             segmentIndexBuilder
         );
         rsm.transformIndex(
             IndexType.LEADER_EPOCH,
-            InputStream.nullInputStream(),
+            new NullInputStream(0),
             0,
             encryptionMetadata,
             segmentIndexBuilder
         );
         rsm.transformIndex(
             IndexType.PRODUCER_SNAPSHOT,
-            InputStream.nullInputStream(),
+            new NullInputStream(0),
             0,
             encryptionMetadata,
             segmentIndexBuilder
         );
-        final var index = segmentIndexBuilder.build();
+        final SegmentIndexesV1 index = segmentIndexBuilder.build();
         assertThat(index.offset().size()).isEqualTo(0);
         assertThat(index.timestamp().size()).isEqualTo(0);
         assertThat(index.leaderEpoch().size()).isEqualTo(0);
@@ -599,14 +595,14 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
     @Test
     void testGetIndexSizeWithInvalidPaths() {
         // non existing file
-        assertThatThrownBy(() -> RemoteStorageManager.indexSize(Path.of("non-exist")))
+        assertThatThrownBy(() -> RemoteStorageManager.indexSize(Paths.get("non-exist")))
             .hasMessage("Error while getting index path size")
             .isInstanceOf(RemoteStorageException.class);
     }
 
     @Test
     void testFetchingSegmentFileNonExistent() throws IOException {
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "chunk.size", "1",
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "storage.root", targetDir.toString()
@@ -635,7 +631,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
 
     @Test
     void testFetchingSegmentManifestNotFound() {
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "chunk.size", "1",
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "storage.root", targetDir.toString()
@@ -661,7 +657,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
     @ParameterizedTest
     @EnumSource(IndexType.class)
     void testFetchingIndexNonExistent(final IndexType indexType) throws IOException {
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "chunk.size", "1",
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "storage.root", targetDir.toString()
@@ -687,7 +683,7 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
     @ParameterizedTest
     @EnumSource(IndexType.class)
     void testFetchingIndexManifestNotFound(final IndexType indexType) {
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "chunk.size", "1",
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "storage.root", targetDir.toString()
@@ -723,6 +719,6 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
         final Path manifestPath = targetDir.resolve(
             objectKeyFactory.key(REMOTE_LOG_METADATA, ObjectKeyFactory.Suffix.MANIFEST).value());
         Files.createDirectories(manifestPath.getParent());
-        Files.writeString(manifestPath, manifest);
+        Files.write(manifestPath, manifest.getBytes(StandardCharsets.UTF_8));
     }
 }

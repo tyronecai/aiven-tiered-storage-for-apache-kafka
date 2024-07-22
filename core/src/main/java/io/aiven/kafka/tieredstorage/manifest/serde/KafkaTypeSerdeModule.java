@@ -35,7 +35,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 public class KafkaTypeSerdeModule {
     public static Module create() {
-        final var module = new SimpleModule();
+        final SimpleModule module = new SimpleModule();
 
         module.addSerializer(Uuid.class, new UuidSerializer());
 

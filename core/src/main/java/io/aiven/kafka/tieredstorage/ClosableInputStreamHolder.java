@@ -37,12 +37,14 @@ class ClosableInputStreamHolder implements AutoCloseable {
     @Override
     public void close() {
         for (final InputStream is : streams) {
-            try {
-                is.close();
-            } catch (final IOException e) {
-                // We want to close all of them or, in case of an error closing some, as much as possible.
-                // So no rethrowing, only logging.
-                log.error("Error closing InputStream", e);
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (final IOException e) {
+                    // We want to close all of them or, in case of an error closing some, as much as possible.
+                    // So no rethrowing, only logging.
+                    log.error("Error closing InputStream", e);
+                }
             }
         }
     }

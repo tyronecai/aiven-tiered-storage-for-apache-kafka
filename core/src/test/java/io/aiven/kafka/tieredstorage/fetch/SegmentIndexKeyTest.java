@@ -32,8 +32,8 @@ class SegmentIndexKeyTest {
 
     @Test
     void identical() {
-        final var ck1 = new SegmentIndexKey(OBJECT_KEY_1, IndexType.OFFSET);
-        final var ck2 = new SegmentIndexKey(OBJECT_KEY_1, IndexType.OFFSET);
+        final SegmentIndexKey ck1 = new SegmentIndexKey(OBJECT_KEY_1, IndexType.OFFSET);
+        final SegmentIndexKey ck2 = new SegmentIndexKey(OBJECT_KEY_1, IndexType.OFFSET);
         assertThat(ck1).isEqualTo(ck2);
         assertThat(ck2).isEqualTo(ck1);
         assertThat(ck1).hasSameHashCodeAs(ck2);
@@ -41,8 +41,8 @@ class SegmentIndexKeyTest {
 
     @Test
     void differentObjectKey() {
-        final var ck1 = new SegmentIndexKey(OBJECT_KEY_1, IndexType.OFFSET);
-        final var ck2 = new SegmentIndexKey(OBJECT_KEY_2, IndexType.OFFSET);
+        final SegmentIndexKey ck1 = new SegmentIndexKey(OBJECT_KEY_1, IndexType.OFFSET);
+        final SegmentIndexKey ck2 = new SegmentIndexKey(OBJECT_KEY_2, IndexType.OFFSET);
         assertThat(ck1).isNotEqualTo(ck2);
         assertThat(ck2).isNotEqualTo(ck1);
         assertThat(ck1).doesNotHaveSameHashCodeAs(ck2);
@@ -50,8 +50,8 @@ class SegmentIndexKeyTest {
 
     @Test
     void differentIndexTypes() {
-        final var ck1 = new SegmentIndexKey(OBJECT_KEY_1, IndexType.OFFSET);
-        final var ck2 = new SegmentIndexKey(OBJECT_KEY_1, IndexType.TIMESTAMP);
+        final SegmentIndexKey ck1 = new SegmentIndexKey(OBJECT_KEY_1, IndexType.OFFSET);
+        final SegmentIndexKey ck2 = new SegmentIndexKey(OBJECT_KEY_1, IndexType.TIMESTAMP);
         assertThat(ck1).isNotEqualTo(ck2);
         assertThat(ck2).isNotEqualTo(ck1);
         assertThat(ck1).doesNotHaveSameHashCodeAs(ck2);

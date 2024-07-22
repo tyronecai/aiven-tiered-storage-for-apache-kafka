@@ -24,6 +24,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.config.ConfigException;
 
 import org.apache.commons.io.FileUtils;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static io.aiven.kafka.tieredstorage.fetch.cache.DiskChunkCacheConfig.CACHE_DIRECTORY;
@@ -62,8 +64,8 @@ class DiskChunkCacheConfigTest {
 
     @Test
     void validConfig() {
-        final var config = new DiskChunkCacheConfig(
-            Map.of(
+        final DiskChunkCacheConfig config = new DiskChunkCacheConfig(
+            ImmutableMap.of(
                 "size", "-1",
                 "path", path.toString()
             )
@@ -76,8 +78,8 @@ class DiskChunkCacheConfigTest {
         Files.createFile(tempCachePath.resolve("temp-file"));
         Files.createFile(cachePath.resolve("cached-file"));
 
-        final var config = new DiskChunkCacheConfig(
-            Map.of(
+        final DiskChunkCacheConfig config = new DiskChunkCacheConfig(
+            ImmutableMap.of(
                 "size", "-1",
                 "path", path.toString()
             )
@@ -93,14 +95,14 @@ class DiskChunkCacheConfigTest {
     @Test
     void failedToResetCachePath() throws IOException {
         Files.createFile(tempCachePath.resolve("temp-file"));
-        final var file = Files.createFile(cachePath.resolve("cached-file"));
+        final Path file = Files.createFile(cachePath.resolve("cached-file"));
 
-        try (final var filesMockedStatic = mockStatic(FileUtils.class, CALLS_REAL_METHODS)) {
+        try (final MockedStatic<FileUtils> filesMockedStatic = mockStatic(FileUtils.class, CALLS_REAL_METHODS)) {
             filesMockedStatic.when(() -> FileUtils.cleanDirectory(eq(path.toFile())))
                 .thenThrow(new IOException("Failed to delete file " + file));
             assertThat(path).exists();
             assertThatThrownBy(() -> new DiskChunkCacheConfig(
-                Map.of(
+                ImmutableMap.of(
                     "size", "-1",
                     "path", path.toString()
                 )
@@ -114,14 +116,17 @@ class DiskChunkCacheConfigTest {
     @ParameterizedTest
     @MethodSource("invalidBaseDirs")
     void invalidBaseDir(final File baseDir) {
-        assertThatThrownBy(() -> new DiskChunkCacheConfig(
-            Map.of(
-                "size", "-1",
-                "path", baseDir.toString()
-            )))
-            .isInstanceOf(ConfigException.class)
-            .hasMessage("Invalid value " + baseDir + " for configuration path: "
-                + baseDir + " must exists and be a writable directory");
+        // 对root用户无效
+        if (!"root".equals(System.getProperty("user.name"))) {
+            assertThatThrownBy(() -> new DiskChunkCacheConfig(
+                ImmutableMap.of(
+                    "size", "-1",
+                    "path", baseDir.toString()
+                )))
+                .isInstanceOf(ConfigException.class)
+                .hasMessage("Invalid value " + baseDir + " for configuration path: "
+                    + baseDir + " must exists and be a writable directory");
+        }
     }
 
     public static Stream<Arguments> invalidBaseDirs() throws IOException {

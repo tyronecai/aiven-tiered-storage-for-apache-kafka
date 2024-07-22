@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.TopicIdPartition;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.Uuid;
@@ -114,7 +115,7 @@ class MemorySegmentIndexesCacheTest {
 
         @Test
         void noEviction() throws IOException, StorageBackendException {
-            cache.configure(Map.of(
+            cache.configure(ImmutableMap.of(
                 "size", "-1",
                 "retention.ms", "-1"
             ));
@@ -158,7 +159,7 @@ class MemorySegmentIndexesCacheTest {
 
         @Test
         void timeBasedEviction() throws IOException, StorageBackendException, InterruptedException {
-            cache.configure(Map.of(
+            cache.configure(ImmutableMap.of(
                 "size", "-1",
                 "retention.ms", "100"
             ));
@@ -213,7 +214,7 @@ class MemorySegmentIndexesCacheTest {
 
         @Test
         void sizeBasedEviction() throws IOException, StorageBackendException {
-            cache.configure(Map.of(
+            cache.configure(ImmutableMap.of(
                 "size", "18",
                 "retention.ms", "-1"
             ));
@@ -279,7 +280,7 @@ class MemorySegmentIndexesCacheTest {
         when(offsetIndexSupplier.get())
             .thenThrow(new RuntimeException(exception));
 
-        final Map<String, String> configs = Map.of(
+        final Map<String, String> configs = ImmutableMap.of(
             "retention.ms", "-1",
             "size", "-1"
         );

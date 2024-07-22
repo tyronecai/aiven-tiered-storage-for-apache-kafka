@@ -24,6 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.MetricNameTemplate;
 import org.apache.kafka.common.metrics.JmxReporter;
 import org.apache.kafka.common.metrics.KafkaMetricsContext;
@@ -103,7 +105,7 @@ public class CaffeineStatsCounter implements StatsCounter {
         final JmxReporter reporter = new JmxReporter();
 
         metrics = new org.apache.kafka.common.metrics.Metrics(
-            new MetricConfig(), List.of(reporter), Time.SYSTEM,
+            new MetricConfig(), ImmutableList.of(reporter), Time.SYSTEM,
             new KafkaMetricsContext("aiven.kafka.server.tieredstorage.cache")
         );
 
@@ -116,14 +118,14 @@ public class CaffeineStatsCounter implements StatsCounter {
         initSensor(CACHE_EVICTION, CACHE_EVICTION_TOTAL, cacheEvictionCountTotal);
         Arrays.stream(RemovalCause.values()).forEach(cause ->
             initSensor("cause." + cause.name() + "." + CACHE_EVICTION, CACHE_EVICTION_TOTAL,
-                cacheEvictionCountByCause.get(cause), () -> Map.of("cause", cause.name()), "cause")
+                cacheEvictionCountByCause.get(cause), () -> ImmutableMap.of("cause", cause.name()), "cause")
         );
 
         initSensor(CACHE_EVICTION_WEIGHT, CACHE_EVICTION_WEIGHT_TOTAL, cacheEvictionWeightTotal);
 
         Arrays.stream(RemovalCause.values()).forEach(cause ->
             initSensor("cause." + cause.name() + "." + CACHE_EVICTION, CACHE_EVICTION_WEIGHT_TOTAL,
-                cacheEvictionWeightByCause.get(cause), () -> Map.of("cause", cause.name()), "cause")
+                cacheEvictionWeightByCause.get(cause), () -> ImmutableMap.of("cause", cause.name()), "cause")
         );
     }
 
@@ -132,7 +134,7 @@ public class CaffeineStatsCounter implements StatsCounter {
                             final LongAdder value,
                             final Supplier<Map<String, String>> tagsSupplier,
                             final String... tagNames) {
-        final var name = new MetricNameTemplate(metricName, groupName, "", tagNames);
+        final MetricNameTemplate name = new MetricNameTemplate(metricName, groupName, "", tagNames);
         new SensorProvider(metrics, sensorName, tagsSupplier)
             .with(name, new MeasurableValue(value::sum))
             .get();
@@ -162,6 +164,11 @@ public class CaffeineStatsCounter implements StatsCounter {
     public void recordLoadFailure(final long loadTime) {
         cacheLoadFailureCount.increment();
         cacheLoadFailureTimeTotal.add(loadTime);
+    }
+
+    @Override
+    public void recordEviction() {
+
     }
 
     @Override
@@ -195,7 +202,7 @@ public class CaffeineStatsCounter implements StatsCounter {
      * @param sizeSupplier operation from cache to provide cache size value
      */
     public void registerSizeMetric(final Supplier<Long> sizeSupplier) {
-        final var name = new MetricNameTemplate(CACHE_SIZE_TOTAL, groupName, "");
+        final MetricNameTemplate name = new MetricNameTemplate(CACHE_SIZE_TOTAL, groupName, "");
         new SensorProvider(metrics, CACHE_SIZE)
             .with(name, new MeasurableValue(sizeSupplier))
             .get();

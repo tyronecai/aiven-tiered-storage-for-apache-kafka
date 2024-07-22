@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableMap;
 import io.aiven.kafka.tieredstorage.fetch.ChunkManager;
 import io.aiven.kafka.tieredstorage.manifest.SegmentManifest;
 import io.aiven.kafka.tieredstorage.manifest.index.ChunkIndex;
@@ -68,7 +69,7 @@ class ChunkCacheMetricsTest {
         return Stream.of(
             Arguments.of(
                 DiskChunkCache.class,
-                Map.of(
+                ImmutableMap.of(
                     "retention.ms", "-1",
                     "size", "-1",
                     "path", baseCachePath.toString()
@@ -76,7 +77,7 @@ class ChunkCacheMetricsTest {
             ),
             Arguments.of(
                 MemoryChunkCache.class,
-                Map.of(
+                ImmutableMap.of(
                     "retention.ms", "-1",
                     "size", "-1"
                 )
@@ -96,10 +97,10 @@ class ChunkCacheMetricsTest {
         when(chunkManager.getChunk(any(), any(), anyInt()))
             .thenReturn(new ByteArrayInputStream("test".getBytes()));
 
-        final var chunkCache = chunkCacheClass.getDeclaredConstructor(ChunkManager.class).newInstance(chunkManager);
+        final ChunkCache chunkCache = chunkCacheClass.getDeclaredConstructor(ChunkManager.class).newInstance(chunkManager);
         chunkCache.configure(config);
 
-        final var objectName = new ObjectName("aiven.kafka.server.tieredstorage.cache:type=chunk-cache-metrics");
+        final ObjectName objectName = new ObjectName("aiven.kafka.server.tieredstorage.cache:type=chunk-cache-metrics");
 
         // When getting a existing chunk from cache
         chunkCache.getChunk(OBJECT_KEY_PATH, segmentManifest, 0);

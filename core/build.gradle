@@ -24,7 +24,7 @@ ext {
 
     bouncyCastleVersion = "1.78.1"
 
-    caffeineVersion = "3.1.8"
+    caffeineVersion = "2.9.3"
 
     zstdVersion = "1.5.6-3"
 }
@@ -34,7 +34,7 @@ dependencies {
 
     // These dependencies are load via specific classloader, only check collisions with inner dependencies (e.g. storage)
 
-    implementation "org.bouncycastle:bcprov-jdk18on:$bouncyCastleVersion"
+    implementation "org.bouncycastle:bcprov-jdk15to18:$bouncyCastleVersion"
 
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
@@ -46,7 +46,7 @@ dependencies {
     implementation "commons-io:commons-io:$apacheCommonsIOVersion"
     implementation project(':commons')
 
-    implementation "com.bucket4j:bucket4j_jdk11-core:$bucket4jVersion"
+    implementation "com.bucket4j:bucket4j_jdk8-core:$bucket4jVersion"
 
     testImplementation(testFixtures(project(":storage:core")))
     testImplementation(project(":storage:filesystem"))

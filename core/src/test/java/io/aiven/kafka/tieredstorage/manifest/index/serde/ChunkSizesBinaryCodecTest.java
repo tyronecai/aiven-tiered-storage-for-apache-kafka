@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,25 +34,25 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ChunkSizesBinaryCodecTest {
     @Test
     void empty() {
-        final List<Integer> values = List.of();
-        final var encoded = ChunkSizesBinaryCodec.encode(values);
-        final var decoded = ChunkSizesBinaryCodec.decode(encoded);
+        final List<Integer> values = ImmutableList.of();
+        final byte[] encoded = ChunkSizesBinaryCodec.encode(values);
+        final List<Integer> decoded = ChunkSizesBinaryCodec.decode(encoded);
         assertThat(decoded).isEqualTo(values);
     }
 
     @Test
     void singleValue() {
-        final List<Integer> values = List.of(213);
-        final var encoded = ChunkSizesBinaryCodec.encode(values);
-        final var decoded = ChunkSizesBinaryCodec.decode(encoded);
+        final List<Integer> values = ImmutableList.of(213);
+        final byte[] encoded = ChunkSizesBinaryCodec.encode(values);
+        final List<Integer> decoded = ChunkSizesBinaryCodec.decode(encoded);
         assertThat(decoded).isEqualTo(values);
     }
 
     @Test
     void singleMaxInt() {
-        final List<Integer> values = List.of(Integer.MAX_VALUE);
-        final var encoded = ChunkSizesBinaryCodec.encode(values);
-        final var decoded = ChunkSizesBinaryCodec.decode(encoded);
+        final List<Integer> values = ImmutableList.of(Integer.MAX_VALUE);
+        final byte[] encoded = ChunkSizesBinaryCodec.encode(values);
+        final List<Integer> decoded = ChunkSizesBinaryCodec.decode(encoded);
         assertThat(decoded).isEqualTo(values);
     }
 
@@ -71,7 +72,7 @@ class ChunkSizesBinaryCodecTest {
         // Check bytes per value.
         assertThat(buf.get()).isEqualTo((byte) expectedBytesPerValue);
 
-        final var decoded = ChunkSizesBinaryCodec.decode(encoded);
+        final List<Integer> decoded = ChunkSizesBinaryCodec.decode(encoded);
         assertThat(decoded).isEqualTo(values);
     }
 
@@ -84,19 +85,19 @@ class ChunkSizesBinaryCodecTest {
         Collections.reverse(longRevertedList);
 
         return Stream.of(
-            Arguments.of(List.of(0, 1000, 2, 44002, 369), 2),
-            Arguments.of(List.of(Integer.MAX_VALUE, Integer.MAX_VALUE - 1, Integer.MAX_VALUE - 2, 10), 1),
-            Arguments.of(List.of(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2 - 1, Integer.MAX_VALUE / 2 - 2, 10), 1),
+            Arguments.of(ImmutableList.of(0, 1000, 2, 44002, 369), 2),
+            Arguments.of(ImmutableList.of(Integer.MAX_VALUE, Integer.MAX_VALUE - 1, Integer.MAX_VALUE - 2, 10), 1),
+            Arguments.of(ImmutableList.of(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2 - 1, Integer.MAX_VALUE / 2 - 2, 10), 1),
             Arguments.of(longList, 4),
             Arguments.of(longRevertedList, 4),
             // Explicit for 1 byte per value.
-            Arguments.of(List.of(1, 2, 3, Integer.MAX_VALUE), 1),
+            Arguments.of(ImmutableList.of(1, 2, 3, Integer.MAX_VALUE), 1),
             // Explicit for 2 bytes  per value.
-            Arguments.of(List.of(1, 0xFF + 10, 0xFF + 20, 0xFF + 30, Integer.MAX_VALUE), 2),
+            Arguments.of(ImmutableList.of(1, 0xFF + 10, 0xFF + 20, 0xFF + 30, Integer.MAX_VALUE), 2),
             // Explicit for 3 bytes  per value.
-            Arguments.of(List.of(1, 0xFFFF + 10, 0xFFFF + 20, 0xFFFF + 30, Integer.MAX_VALUE), 3),
+            Arguments.of(ImmutableList.of(1, 0xFFFF + 10, 0xFFFF + 20, 0xFFFF + 30, Integer.MAX_VALUE), 3),
             // Explicit for 4 bytes  per value.
-            Arguments.of(List.of(1, 0xFFFFFF + 10, 0xFFFFFF + 20, 0xFFFFFF + 30, Integer.MAX_VALUE), 4)
+            Arguments.of(ImmutableList.of(1, 0xFFFFFF + 10, 0xFFFFFF + 20, 0xFFFFFF + 30, Integer.MAX_VALUE), 4)
         );
     }
 
@@ -110,10 +111,10 @@ class ChunkSizesBinaryCodecTest {
 
     static Stream<List<Integer>> provideNegativeValues() {
         return Stream.of(
-            List.of(-1),
-            List.of(-1, 2, 3),
-            List.of(1, -2, 3),
-            List.of(1, 2, -3)
+            ImmutableList.of(-1),
+            ImmutableList.of(-1, 2, 3),
+            ImmutableList.of(1, -2, 3),
+            ImmutableList.of(1, 2, -3)
         );
     }
 }

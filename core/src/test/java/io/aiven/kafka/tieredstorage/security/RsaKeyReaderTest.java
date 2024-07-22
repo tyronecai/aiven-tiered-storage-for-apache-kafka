@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -43,10 +44,10 @@ class RsaKeyReaderTest extends RsaKeyAwareTest {
 
     @Test
     void throwsIllegalArgumentExceptionUnsupportedKey(@TempDir final Path tmpDir) throws Exception {
-        final var dsaPublicKeyPem = tmpDir.resolve("dsa_public_key.pem");
-        final var dsaPrivateKeyPem = tmpDir.resolve("dsa_private_key.pem");
+        final Path dsaPublicKeyPem = tmpDir.resolve("dsa_public_key.pem");
+        final Path dsaPrivateKeyPem = tmpDir.resolve("dsa_private_key.pem");
 
-        final var dsaKeyPair = KeyPairGenerator.getInstance("DSA").generateKeyPair();
+        final KeyPair dsaKeyPair = KeyPairGenerator.getInstance("DSA").generateKeyPair();
         writePemFile(dsaPublicKeyPem, new X509EncodedKeySpec(dsaKeyPair.getPublic().getEncoded()));
         writePemFile(dsaPrivateKeyPem, new PKCS8EncodedKeySpec(dsaKeyPair.getPrivate().getEncoded()));
 
@@ -58,7 +59,7 @@ class RsaKeyReaderTest extends RsaKeyAwareTest {
 
     @Test
     void throwsIllegalArgumentExceptionForEmptyPublicKey(@TempDir final Path tmpDir) throws IOException {
-        final var emptyPublicKeyPemFile =
+        final Path emptyPublicKeyPemFile =
             Files.createFile(tmpDir.resolve("empty_public_key.pem"));
 
         assertThatThrownBy(
@@ -69,7 +70,7 @@ class RsaKeyReaderTest extends RsaKeyAwareTest {
 
     @Test
     void throwsIllegalArgumentExceptionForEmptyPrivateKey(@TempDir final Path tmpDir) throws IOException {
-        final var emptyPrivateKeyPemFile =
+        final Path emptyPrivateKeyPemFile =
             Files.createFile(tmpDir.resolve("empty_private_key.pem"));
 
         assertThatThrownBy(

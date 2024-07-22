@@ -43,20 +43,20 @@ class CompressionChunkEnumerationTest {
     @Test
     void originalChunkSizePropagated() {
         when(inner.originalChunkSize()).thenReturn(123);
-        final var transform = new CompressionChunkEnumeration(inner);
+        final CompressionChunkEnumeration transform = new CompressionChunkEnumeration(inner);
         assertThat(transform.originalChunkSize()).isEqualTo(123);
         verify(inner).originalChunkSize();
     }
 
     @Test
     void transformedChunkSize() {
-        final var transform = new CompressionChunkEnumeration(inner);
+        final CompressionChunkEnumeration transform = new CompressionChunkEnumeration(inner);
         assertThat(transform.transformedChunkSize()).isNull();
     }
 
     @Test
     void hasMoreElementsPropagated() {
-        final var transform = new CompressionChunkEnumeration(inner);
+        final CompressionChunkEnumeration transform = new CompressionChunkEnumeration(inner);
         when(inner.hasMoreElements())
             .thenReturn(true)
             .thenReturn(false);
@@ -68,7 +68,7 @@ class CompressionChunkEnumerationTest {
     @Test
     void compress() {
         final byte[] data = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        final var transform = new CompressionChunkEnumeration(inner);
+        final CompressionChunkEnumeration transform = new CompressionChunkEnumeration(inner);
         when(inner.nextElement()).thenReturn(data);
 
         final byte[] compressed = transform.nextElement();

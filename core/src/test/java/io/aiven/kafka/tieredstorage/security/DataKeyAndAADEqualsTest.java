@@ -29,8 +29,8 @@ class DataKeyAndAADEqualsTest {
     void identical() {
         final byte[] keyBytes = new byte[32];
         final byte[] aad = new byte[32];
-        final var dataKeyAndAAD1 = new DataKeyAndAAD(new SecretKeySpec(keyBytes, "AES"), aad);
-        final var dataKeyAndAAD2 = new DataKeyAndAAD(new SecretKeySpec(keyBytes, "AES"), aad);
+        final DataKeyAndAAD dataKeyAndAAD1 = new DataKeyAndAAD(new SecretKeySpec(keyBytes, "AES"), aad);
+        final DataKeyAndAAD dataKeyAndAAD2 = new DataKeyAndAAD(new SecretKeySpec(keyBytes, "AES"), aad);
         assertThat(dataKeyAndAAD1).isEqualTo(dataKeyAndAAD2);
         assertThat(dataKeyAndAAD2).isEqualTo(dataKeyAndAAD1);
         assertThat(dataKeyAndAAD1).hasSameHashCodeAs(dataKeyAndAAD2);
@@ -42,8 +42,8 @@ class DataKeyAndAADEqualsTest {
         final byte[] keyBytes2 = new byte[32];
         Arrays.fill(keyBytes2, (byte) 1);
         final byte[] aad = new byte[32];
-        final var dataKeyAndAAD1 = new DataKeyAndAAD(new SecretKeySpec(keyBytes1, "AES"), aad);
-        final var dataKeyAndAAD2 = new DataKeyAndAAD(new SecretKeySpec(keyBytes2, "AES"), aad);
+        final DataKeyAndAAD dataKeyAndAAD1 = new DataKeyAndAAD(new SecretKeySpec(keyBytes1, "AES"), aad);
+        final DataKeyAndAAD dataKeyAndAAD2 = new DataKeyAndAAD(new SecretKeySpec(keyBytes2, "AES"), aad);
         assertThat(dataKeyAndAAD1).isNotEqualTo(dataKeyAndAAD2);
         assertThat(dataKeyAndAAD2).isNotEqualTo(dataKeyAndAAD1);
         assertThat(dataKeyAndAAD1).doesNotHaveSameHashCodeAs(dataKeyAndAAD2);
@@ -55,8 +55,8 @@ class DataKeyAndAADEqualsTest {
         final byte[] aad1 = new byte[32];
         final byte[] aad2 = new byte[32];
         Arrays.fill(aad2, (byte) 1);
-        final var dataKeyAndAAD1 = new DataKeyAndAAD(new SecretKeySpec(keyBytes, "AES"), aad1);
-        final var dataKeyAndAAD2 = new DataKeyAndAAD(new SecretKeySpec(keyBytes, "AES"), aad2);
+        final DataKeyAndAAD dataKeyAndAAD1 = new DataKeyAndAAD(new SecretKeySpec(keyBytes, "AES"), aad1);
+        final DataKeyAndAAD dataKeyAndAAD2 = new DataKeyAndAAD(new SecretKeySpec(keyBytes, "AES"), aad2);
         assertThat(dataKeyAndAAD1).isNotEqualTo(dataKeyAndAAD2);
         assertThat(dataKeyAndAAD2).isNotEqualTo(dataKeyAndAAD1);
         assertThat(dataKeyAndAAD1).doesNotHaveSameHashCodeAs(dataKeyAndAAD2);

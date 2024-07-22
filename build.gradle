@@ -46,7 +46,7 @@ subprojects {
     apply plugin: "java"
 
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
-    apply plugin: "checkstyle"
+    //apply plugin: "checkstyle"
 
     // https://docs.gradle.org/current/userguide/jacoco_plugin.html
     apply plugin: "jacoco"
@@ -68,17 +68,17 @@ subprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
 
         withJavadocJar()
         withSourcesJar()
     }
 
-    checkstyle {
-        toolVersion = "10.12.0"
-        configDirectory = rootProject.file("checkstyle/")
-    }
+    //checkstyle {
+    //    toolVersion = "10.12.0"
+    //    configDirectory = rootProject.file("checkstyle/")
+    //}
 
     pitest {
         //adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
@@ -103,11 +103,11 @@ subprojects {
 
         junitPlatformVersion = "1.10.2"
 
-        mockitoVersion = "5.12.0"
+        mockitoVersion = "4.11.0"
 
         slf4jVersion = "1.7.36"
 
-        kafkaVersion = "3.6.0"
+        kafkaVersion = "3.6.2"
 
         assertJVersion = "3.25.3"
 
@@ -121,13 +121,15 @@ subprojects {
 
         gcpSdkVersion = "2.39.0"
 
+        guavaVersion = "33.2.1-jre"
+
         azureSdkVersion = "1.2.23"
 
         testcontainersVersion = "1.19.7"
 
         testcontainersFakeGcsServerVersion = "0.2.0"
 
-        bucket4jVersion = "8.13.1"
+        bucket4jVersion = "8.10.1"
     }
 
     dependencies {
@@ -135,6 +137,8 @@ subprojects {
         compileOnly "org.apache.kafka:kafka-storage-api:$kafkaVersion"
 
         compileOnly "org.slf4j:slf4j-api:$slf4jVersion"
+
+        implementation "com.google.guava:guava:$guavaVersion"
 
         testImplementation "org.apache.kafka:kafka-clients:$kafkaVersion"
         testImplementation "org.apache.kafka:kafka-storage-api:$kafkaVersion"
@@ -147,6 +151,7 @@ subprojects {
         testImplementation "org.assertj:assertj-core:$assertJVersion"
 
         testImplementation "org.mockito:mockito-core:$mockitoVersion"
+        testImplementation "org.mockito:mockito-inline:$mockitoVersion"
         testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
 
         testImplementation "org.awaitility:awaitility:$awaitilityVersion"

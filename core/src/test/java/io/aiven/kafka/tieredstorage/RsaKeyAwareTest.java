@@ -31,6 +31,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import io.aiven.kafka.tieredstorage.security.RsaKeyReader;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -58,7 +59,7 @@ public abstract class RsaKeyAwareTest {
     @BeforeAll
     static void generateRsaKeyPair(@TempDir final Path tmpFolder)
         throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
-        final var keyPair = KeyPairGenerator.getInstance("RSA", "BC");
+        final KeyPairGenerator keyPair = KeyPairGenerator.getInstance("RSA", "BC");
         keyPair.initialize(2048, SecureRandom.getInstanceStrong());
         rsaKeyPair = keyPair.generateKeyPair();
 
@@ -68,12 +69,12 @@ public abstract class RsaKeyAwareTest {
         writePemFile(publicKeyPem, new X509EncodedKeySpec(rsaKeyPair.getPublic().getEncoded()));
         writePemFile(privateKeyPem, new PKCS8EncodedKeySpec(rsaKeyPair.getPrivate().getEncoded()));
 
-        keyRing = Map.of(KEY_ENCRYPTION_KEY_ID, RsaKeyReader.read(publicKeyPem, privateKeyPem));
+        keyRing = ImmutableMap.of(KEY_ENCRYPTION_KEY_ID, RsaKeyReader.read(publicKeyPem, privateKeyPem));
     }
 
     protected static void writePemFile(final Path path, final EncodedKeySpec encodedKeySpec) throws IOException {
-        try (var pemWriter = new PemWriter(Files.newBufferedWriter(path))) {
-            final var pemObject = new PemObject("SOME KEY", encodedKeySpec.getEncoded());
+        try (PemWriter pemWriter = new PemWriter(Files.newBufferedWriter(path))) {
+            final PemObject pemObject = new PemObject("SOME KEY", encodedKeySpec.getEncoded());
             pemWriter.writeObject(pemObject);
             pemWriter.flush();
         }

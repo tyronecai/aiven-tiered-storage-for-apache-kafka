@@ -48,7 +48,7 @@ public class CompressionChunkEnumeration implements TransformChunkEnumeration {
 
     @Override
     public byte[] nextElement() {
-        final var chunk = inner.nextElement();
+        final byte[] chunk = inner.nextElement();
         try (final ZstdCompressCtx compressCtx = new ZstdCompressCtx()) {
             try {
                 compressCtx.setPledgedSrcSize(chunk.length);

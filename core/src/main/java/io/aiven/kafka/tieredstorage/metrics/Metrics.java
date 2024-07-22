@@ -18,6 +18,7 @@ package io.aiven.kafka.tieredstorage.metrics;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.metrics.JmxReporter;
 import org.apache.kafka.common.metrics.KafkaMetricsContext;
@@ -67,7 +68,7 @@ public class Metrics {
 
         metrics = new org.apache.kafka.common.metrics.Metrics(
             metricConfig,
-            List.of(reporter),
+            ImmutableList.of(reporter),
             time,
             new KafkaMetricsContext("aiven.kafka.server.tieredstorage")
         );
@@ -76,7 +77,7 @@ public class Metrics {
     }
 
     public void recordSegmentCopyTime(final TopicPartition topicPartition, final long startMs, final long endMs) {
-        final var time = endMs - startMs;
+        final long time = endMs - startMs;
         new SensorProvider(metrics, sensorName(SEGMENT_COPY_TIME))
             .with(metricsRegistry.segmentCopyTimeAvg, new Avg())
             .with(metricsRegistry.segmentCopyTimeMax, new Max())
@@ -146,7 +147,7 @@ public class Metrics {
     }
 
     public void recordSegmentDeleteTime(final TopicPartition topicPartition, final long startMs, final long endMs) {
-        final var time = endMs - startMs;
+        final long time = endMs - startMs;
         new SensorProvider(metrics, sensorName(SEGMENT_DELETE_TIME))
             .with(metricsRegistry.segmentDeleteTimeAvg, new Avg())
             .with(metricsRegistry.segmentDeleteTimeMax, new Max())

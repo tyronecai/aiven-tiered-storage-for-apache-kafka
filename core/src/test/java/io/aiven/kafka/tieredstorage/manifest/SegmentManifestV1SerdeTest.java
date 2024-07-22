@@ -22,6 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.TopicIdPartition;
 import org.apache.kafka.common.Uuid;
 import org.apache.kafka.server.log.remote.storage.RemoteLogSegmentId;
@@ -61,7 +62,7 @@ class SegmentManifestV1SerdeTest extends RsaKeyAwareTest {
         2,
         2000000000L,
         100500,
-        Map.of(0, 100L, 1, 200L, 2, 300L)
+        ImmutableMap.of(0, 100L, 1, 200L, 2, 300L)
     );
 
     static final SegmentIndexesV1 SEGMENT_INDEXES = SegmentIndexesV1.builder()
@@ -174,7 +175,7 @@ class SegmentManifestV1SerdeTest extends RsaKeyAwareTest {
 
     @Test
     void withoutEncryption() throws JsonProcessingException {
-        final var manifest = new SegmentManifestV1(INDEX, SEGMENT_INDEXES, false, null, REMOTE_LOG_SEGMENT_METADATA);
+        final SegmentManifestV1 manifest = new SegmentManifestV1(INDEX, SEGMENT_INDEXES, false, null, REMOTE_LOG_SEGMENT_METADATA);
 
         final String jsonStr = mapper.writeValueAsString(manifest);
 
@@ -188,7 +189,7 @@ class SegmentManifestV1SerdeTest extends RsaKeyAwareTest {
 
     @Test
     void withoutTxnIndex() throws JsonProcessingException {
-        final var manifest = new SegmentManifestV1(INDEX, SEGMENT_INDEXES_WITHOUT_TXN_INDEX,
+        final SegmentManifestV1 manifest = new SegmentManifestV1(INDEX, SEGMENT_INDEXES_WITHOUT_TXN_INDEX,
             false, null, REMOTE_LOG_SEGMENT_METADATA);
 
         final String jsonStr = mapper.writeValueAsString(manifest);

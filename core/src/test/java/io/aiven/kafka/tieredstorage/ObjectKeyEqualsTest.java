@@ -19,15 +19,17 @@ package io.aiven.kafka.tieredstorage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.lang.reflect.Constructor;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ObjectKeyEqualsTest {
     @ParameterizedTest
     @ValueSource(classes = {ObjectKeyFactory.PlainObjectKey.class, ObjectKeyFactory.ObjectKeyWithMaskedPrefix.class})
     void identical(final Class<ObjectKeyFactory.PlainObjectKey> keyClass) throws ReflectiveOperationException {
-        final var constructor = keyClass.getDeclaredConstructor(String.class, String.class);
-        final var k1 = constructor.newInstance("prefix", "mainPathAndSuffix");
-        final var k2 = constructor.newInstance("prefix", "mainPathAndSuffix");
+        final Constructor constructor = keyClass.getDeclaredConstructor(String.class, String.class);
+        final Object k1 = constructor.newInstance("prefix", "mainPathAndSuffix");
+        final Object k2 = constructor.newInstance("prefix", "mainPathAndSuffix");
         assertThat(k1).isEqualTo(k2);
         assertThat(k2).isEqualTo(k1);
         assertThat(k1).hasSameHashCodeAs(k2);
@@ -36,9 +38,9 @@ public class ObjectKeyEqualsTest {
     @ParameterizedTest
     @ValueSource(classes = {ObjectKeyFactory.PlainObjectKey.class, ObjectKeyFactory.ObjectKeyWithMaskedPrefix.class})
     void differentPrefix(final Class<ObjectKeyFactory.PlainObjectKey> keyClass) throws ReflectiveOperationException {
-        final var constructor = keyClass.getDeclaredConstructor(String.class, String.class);
-        final var k1 = constructor.newInstance("prefix1", "mainPathAndSuffix");
-        final var k2 = constructor.newInstance("prefix2", "mainPathAndSuffix");
+        final Constructor constructor = keyClass.getDeclaredConstructor(String.class, String.class);
+        final Object k1 = constructor.newInstance("prefix1", "mainPathAndSuffix");
+        final Object k2 = constructor.newInstance("prefix2", "mainPathAndSuffix");
         assertThat(k1).isNotEqualTo(k2);
         assertThat(k2).isNotEqualTo(k1);
         assertThat(k1).doesNotHaveSameHashCodeAs(k2);
@@ -48,9 +50,9 @@ public class ObjectKeyEqualsTest {
     @ValueSource(classes = {ObjectKeyFactory.PlainObjectKey.class, ObjectKeyFactory.ObjectKeyWithMaskedPrefix.class})
     void differentMainPathAndSuffix(final Class<ObjectKeyFactory.PlainObjectKey> keyClass)
         throws ReflectiveOperationException {
-        final var constructor = keyClass.getDeclaredConstructor(String.class, String.class);
-        final var k1 = constructor.newInstance("prefix", "mainPathAndSuffix1");
-        final var k2 = constructor.newInstance("prefix", "mainPathAndSuffix2");
+        final Constructor constructor = keyClass.getDeclaredConstructor(String.class, String.class);
+        final Object k1 = constructor.newInstance("prefix", "mainPathAndSuffix1");
+        final Object k2 = constructor.newInstance("prefix", "mainPathAndSuffix2");
         assertThat(k1).isNotEqualTo(k2);
         assertThat(k2).isNotEqualTo(k1);
         assertThat(k1).doesNotHaveSameHashCodeAs(k2);

@@ -16,6 +16,7 @@
 
 package io.aiven.kafka.tieredstorage.security;
 
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import io.aiven.kafka.tieredstorage.RsaKeyAwareTest;
@@ -50,11 +51,11 @@ public class AesEncryptionProviderTest extends RsaKeyAwareTest {
 
     @Test
     void decryptGeneratedKey() {
-        final var rsaEncryptionProvider = new RsaEncryptionProvider(KEY_ENCRYPTION_KEY_ID, keyRing);
+        final RsaEncryptionProvider rsaEncryptionProvider = new RsaEncryptionProvider(KEY_ENCRYPTION_KEY_ID, keyRing);
         final AesEncryptionProvider aesProvider = new AesEncryptionProvider();
-        final var dataKey = aesProvider.createDataKeyAndAAD().dataKey;
-        final var encryptedKey = rsaEncryptionProvider.encryptDataKey(dataKey.getEncoded());
-        final var restoredKey = rsaEncryptionProvider.decryptDataKey(
+        final SecretKey dataKey = aesProvider.createDataKeyAndAAD().dataKey;
+        final EncryptedDataKey encryptedKey = rsaEncryptionProvider.encryptDataKey(dataKey.getEncoded());
+        final byte[] restoredKey = rsaEncryptionProvider.decryptDataKey(
             new EncryptedDataKey(encryptedKey.keyEncryptionKeyId, encryptedKey.encryptedDataKey));
 
         assertThat(new SecretKeySpec(restoredKey, "AES")).isEqualTo(dataKey);

@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
 
@@ -28,13 +29,13 @@ import org.apache.kafka.common.config.ConfigException;
  * a valid URL with http or https schemes.
  */
 public class ValidUrl implements ConfigDef.Validator {
-    private static final List<String> SUPPORTED_SCHEMAS = List.of("http", "https");
+    private static final List<String> SUPPORTED_SCHEMAS = ImmutableList.of("http", "https");
 
     @Override
     public void ensureValid(final String name, final Object value) {
         if (value != null) {
             try {
-                final var url = new URL((String) value);
+                final URL url = new URL((String) value);
                 if (!SUPPORTED_SCHEMAS.contains(url.getProtocol())) {
                     throw new ConfigException(name, value, "URL must have scheme from the list " + SUPPORTED_SCHEMAS);
                 }

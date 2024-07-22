@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
+import org.apache.kafka.common.config.types.Password;
 
 public class ProxyConfig extends AbstractConfig {
     public static final String PROXY_PREFIX = "proxy.";
@@ -95,12 +96,12 @@ public class ProxyConfig extends AbstractConfig {
     }
 
     public String username() {
-        final var secret = getPassword(PROXY_USERNAME);
+        final Password secret = getPassword(PROXY_USERNAME);
         return secret != null ? secret.value() : null;
     }
 
     public String password() {
-        final var secret = getPassword(PROXY_PASSWORD);
+        final Password secret = getPassword(PROXY_PASSWORD);
         return secret != null ? secret.value() : null;
     }
 }

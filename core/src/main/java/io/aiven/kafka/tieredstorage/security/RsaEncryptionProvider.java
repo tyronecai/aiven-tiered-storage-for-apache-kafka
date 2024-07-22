@@ -56,7 +56,7 @@ public final class RsaEncryptionProvider {
 
     public EncryptedDataKey encryptDataKey(final byte[] dataKey) {
         try {
-            final var cipher = createEncryptingCipher(encryptionPublicKey);
+            final Cipher cipher = createEncryptingCipher(encryptionPublicKey);
             return new EncryptedDataKey(activeKeyId, cipher.doFinal(dataKey));
         } catch (final IllegalBlockSizeException | BadPaddingException e) {
             throw new RuntimeException("Couldn't encrypt AES key", e);
@@ -66,7 +66,7 @@ public final class RsaEncryptionProvider {
     private Cipher createEncryptingCipher(final Key key) {
         Objects.requireNonNull(key, "key cannot be null");
         try {
-            final var cipher = Cipher.getInstance(RSA_TRANSFORMATION, "BC");
+            final Cipher cipher = Cipher.getInstance(RSA_TRANSFORMATION, "BC");
             cipher.init(Cipher.ENCRYPT_MODE, key, SecureRandom.getInstanceStrong());
             return cipher;
         } catch (final NoSuchAlgorithmException | NoSuchPaddingException
@@ -91,7 +91,7 @@ public final class RsaEncryptionProvider {
 
     private Cipher createDecryptingCipher(final Key key) {
         try {
-            final var cipher = Cipher.getInstance(RSA_TRANSFORMATION, "BC");
+            final Cipher cipher = Cipher.getInstance(RSA_TRANSFORMATION, "BC");
             cipher.init(Cipher.DECRYPT_MODE, key, SecureRandom.getInstanceStrong());
             return cipher;
         } catch (final NoSuchAlgorithmException | NoSuchPaddingException

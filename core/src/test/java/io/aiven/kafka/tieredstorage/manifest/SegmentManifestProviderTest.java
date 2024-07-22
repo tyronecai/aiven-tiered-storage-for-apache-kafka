@@ -114,8 +114,8 @@ class SegmentManifestProviderTest {
             () -> "topic-AAAAAAAAAAAAAAAAAAAAAQ/7/00000000000000000023-AAAAAAAAAAAAAAAAAAAAAA.rsm-manifest";
         when(storage.fetch(key))
             .thenReturn(new ByteArrayInputStream(MANIFEST.getBytes()));
-        final var chunkIndex = new FixedSizeChunkIndex(100, 1000, 110, 110);
-        final var expectedManifest = new SegmentManifestV1(chunkIndex, SEGMENT_INDEXES, false, null, null);
+        final FixedSizeChunkIndex chunkIndex = new FixedSizeChunkIndex(100, 1000, 110, 110);
+        final SegmentManifestV1 expectedManifest = new SegmentManifestV1(chunkIndex, SEGMENT_INDEXES, false, null, null);
         assertThat(provider.get(key)).isEqualTo(expectedManifest);
         verify(storage).fetch(key);
         assertThat(provider.get(key)).isEqualTo(expectedManifest);
@@ -154,8 +154,8 @@ class SegmentManifestProviderTest {
             .isInstanceOf(StorageBackendException.class)
             .hasMessage("test");
 
-        final var chunkIndex = new FixedSizeChunkIndex(100, 1000, 110, 110);
-        final var expectedManifest = new SegmentManifestV1(chunkIndex, SEGMENT_INDEXES, false, null, null);
+        final FixedSizeChunkIndex chunkIndex = new FixedSizeChunkIndex(100, 1000, 110, 110);
+        final SegmentManifestV1 expectedManifest = new SegmentManifestV1(chunkIndex, SEGMENT_INDEXES, false, null, null);
 
         await().atMost(Duration.ofMillis(50))
             .pollInterval(Duration.ofMillis(5))

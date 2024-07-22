@@ -87,8 +87,8 @@ class DefaultChunkManagerTest extends AesKeyAwareTest {
         when(storage.fetch(OBJECT_KEY, chunkIndex.chunks().get(0).range())).thenReturn(
             new ByteArrayInputStream(encrypted));
 
-        final var encryption = new SegmentEncryptionMetadataV1(dataKeyAndAAD.dataKey, dataKeyAndAAD.aad);
-        final var manifest = new SegmentManifestV1(chunkIndex, SEGMENT_INDEXES, false, encryption, null);
+        final SegmentEncryptionMetadataV1 encryption = new SegmentEncryptionMetadataV1(dataKeyAndAAD.dataKey, dataKeyAndAAD.aad);
+        final SegmentManifestV1 manifest = new SegmentManifestV1(chunkIndex, SEGMENT_INDEXES, false, encryption, null);
         final ChunkManager chunkManager = new DefaultChunkManager(storage, aesEncryptionProvider);
 
         assertThat(chunkManager.getChunk(OBJECT_KEY, manifest, 0)).hasBinaryContent(TEST_CHUNK_CONTENT);
@@ -108,7 +108,7 @@ class DefaultChunkManagerTest extends AesKeyAwareTest {
         when(storage.fetch(OBJECT_KEY, chunkIndex.chunks().get(0).range()))
             .thenReturn(new ByteArrayInputStream(compressed));
 
-        final var manifest = new SegmentManifestV1(chunkIndex, SEGMENT_INDEXES, true, null, null);
+        final SegmentManifestV1 manifest = new SegmentManifestV1(chunkIndex, SEGMENT_INDEXES, true, null, null);
         final ChunkManager chunkManager = new DefaultChunkManager(storage, null);
 
         assertThat(chunkManager.getChunk(OBJECT_KEY, manifest, 0)).hasBinaryContent(TEST_CHUNK_CONTENT);

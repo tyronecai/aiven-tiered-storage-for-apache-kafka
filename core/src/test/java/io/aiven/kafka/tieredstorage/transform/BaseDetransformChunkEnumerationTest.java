@@ -22,8 +22,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.google.common.collect.ImmutableList;
 import io.aiven.kafka.tieredstorage.Chunk;
 
+import org.apache.commons.io.input.NullInputStream;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,14 +34,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class BaseDetransformChunkEnumerationTest {
     @Test
     void nullInputStream() {
-        assertThatThrownBy(() -> new BaseDetransformChunkEnumeration(null, List.of()))
+        assertThatThrownBy(() -> new BaseDetransformChunkEnumeration(null, ImmutableList.of()))
             .isInstanceOf(NullPointerException.class)
             .hasMessage("inputStream cannot be null");
     }
 
     @Test
     void nullChunks() {
-        assertThatThrownBy(() -> new BaseDetransformChunkEnumeration(InputStream.nullInputStream(), null))
+        assertThatThrownBy(() -> new BaseDetransformChunkEnumeration(new NullInputStream(0), null))
             .isInstanceOf(NullPointerException.class)
             .hasMessage("chunks cannot be null");
     }
@@ -47,14 +49,14 @@ class BaseDetransformChunkEnumerationTest {
     @Test
     void inputStreamFewerBytesThanExpected() {
         // 1 byte in the input stream.
-        final var bais = new ByteArrayInputStream(new byte[] {0});
+        final ByteArrayInputStream bais = new ByteArrayInputStream(new byte[] {0});
         // 2 chunks of 1 byte expected.
-        final List<Chunk> chunks = List.of(
+        final List<Chunk> chunks = ImmutableList.of(
             new Chunk(0, 0, 1, 0, 1),
             new Chunk(1, 1, 1, 1, 1)
         );
 
-        final var transform = new BaseDetransformChunkEnumeration(bais, chunks);
+        final BaseDetransformChunkEnumeration transform = new BaseDetransformChunkEnumeration(bais, chunks);
         assertThat(transform.hasMoreElements()).isTrue();
         transform.nextElement();
         assertThatThrownBy(() -> transform.hasMoreElements())
@@ -78,10 +80,10 @@ class BaseDetransformChunkEnumerationTest {
 
     void testOneChunk(final byte[] originalData, final int expectedChunkSize, final byte[] expectedData) {
         // 1 chunk is expected.
-        final List<Chunk> chunks = List.of(
+        final List<Chunk> chunks = ImmutableList.of(
             new Chunk(0, 0, expectedChunkSize, 0, expectedChunkSize)
         );
-        final var transform = new BaseDetransformChunkEnumeration(new ByteArrayInputStream(originalData), chunks);
+        final BaseDetransformChunkEnumeration transform = new BaseDetransformChunkEnumeration(new ByteArrayInputStream(originalData), chunks);
         assertThat(transform.hasMoreElements()).isTrue();
         assertThat(transform.nextElement()).isEqualTo(expectedData);
 
@@ -95,13 +97,13 @@ class BaseDetransformChunkEnumerationTest {
         // 10 bytes in the input stream.
         final byte[] data = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         // 4 chunks of 3, 3, 3, and 1bytes expected.
-        final List<Chunk> chunks = List.of(
+        final List<Chunk> chunks = ImmutableList.of(
             new Chunk(0, 0, 3, 0, 3),
             new Chunk(1, 3, 3, 3, 3),
             new Chunk(2, 6, 3, 6, 3),
             new Chunk(3, 9, 3, 9, 1)
         );
-        final var transform = new BaseDetransformChunkEnumeration(new ByteArrayInputStream(data), chunks);
+        final BaseDetransformChunkEnumeration transform = new BaseDetransformChunkEnumeration(new ByteArrayInputStream(data), chunks);
         assertThat(transform.hasMoreElements()).isTrue();
         assertThat(transform.nextElement()).isEqualTo(new byte[] {0, 1, 2});
         assertThat(transform.hasMoreElements()).isTrue();

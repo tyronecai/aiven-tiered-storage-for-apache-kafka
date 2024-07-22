@@ -19,6 +19,7 @@ package io.aiven.kafka.tieredstorage.security;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -52,7 +53,7 @@ public class AesEncryptionProvider {
     public DataKeyAndAAD createDataKeyAndAAD() {
         // Attention: these two generateKey() calls must be separate!
         // "Optimizing" them into one will result in a serious security flaw.
-        final var dataKey = aesKeyGenerator.generateKey();
+        final SecretKey dataKey = aesKeyGenerator.generateKey();
         final byte[] aad = aesKeyGenerator.generateKey().getEncoded();
         return new DataKeyAndAAD(dataKey, aad);
     }
@@ -66,7 +67,7 @@ public class AesEncryptionProvider {
     private Cipher createEncryptingCipher(final Key key) {
         Objects.requireNonNull(key, "key cannot be null");
         try {
-            final var cipher = Cipher.getInstance(AES_TRANSFORMATION);
+            final Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
             cipher.init(Cipher.ENCRYPT_MODE, key, SecureRandom.getInstanceStrong());
             return cipher;
         } catch (final NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
@@ -88,7 +89,7 @@ public class AesEncryptionProvider {
         Objects.requireNonNull(key, "key cannot be null");
         Objects.requireNonNull(params, "params cannot be null");
         try {
-            final var cipher = Cipher.getInstance(AES_TRANSFORMATION);
+            final Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
             cipher.init(Cipher.DECRYPT_MODE, key, params, SecureRandom.getInstanceStrong());
             return cipher;
         } catch (final NoSuchAlgorithmException | NoSuchPaddingException

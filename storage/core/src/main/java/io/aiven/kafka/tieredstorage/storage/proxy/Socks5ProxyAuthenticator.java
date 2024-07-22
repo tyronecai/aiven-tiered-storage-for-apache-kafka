@@ -16,6 +16,7 @@
 
 package io.aiven.kafka.tieredstorage.storage.proxy;
 
+import java.lang.reflect.Field;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
@@ -36,8 +37,12 @@ public class Socks5ProxyAuthenticator extends Authenticator {
      */
     public static synchronized void register(
         final String host, final int port, final String username, final String password
-    ) {
-        final Authenticator currentDefault = Authenticator.getDefault();
+    ) throws NoSuchFieldException, IllegalAccessException {
+        // final Authenticator currentDefault = Authenticator.getDefault();
+        Class<?> clazz = Authenticator.class;
+        Field staticField = clazz.getDeclaredField("theAuthenticator");
+        staticField.setAccessible(true);
+        final Authenticator currentDefault = (Authenticator) staticField.get(null);
         if (currentDefault != null) {
             if (!(currentDefault instanceof Socks5ProxyAuthenticator)) {
                 // This is not really expected to happen in Kafka installations.

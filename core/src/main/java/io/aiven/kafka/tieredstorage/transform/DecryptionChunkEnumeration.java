@@ -52,8 +52,8 @@ public class DecryptionChunkEnumeration implements DetransformChunkEnumeration {
 
     @Override
     public byte[] nextElement() {
-        final var chunk = inner.nextElement();
-        final var cipher = cipherSupplier.apply(chunk);
+        final byte[] chunk = inner.nextElement();
+        final Cipher cipher = cipherSupplier.apply(chunk);
         try {
             return cipher.doFinal(chunk, ivSize, chunk.length - ivSize);
         } catch (final IllegalBlockSizeException | BadPaddingException e) {

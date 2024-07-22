@@ -69,7 +69,7 @@ public class MemorySegmentIndexesCache implements SegmentIndexesCache {
         final Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
         config.cacheSize().ifPresent(maximumWeight -> cacheBuilder.maximumWeight(maximumWeight).weigher(weigher()));
         config.cacheRetention().ifPresent(cacheBuilder::expireAfterAccess);
-        final var cache = cacheBuilder.evictionListener(removalListener())
+        final AsyncCache cache = cacheBuilder.evictionListener(removalListener())
             .scheduler(Scheduler.systemScheduler())
             .executor(executor)
             .recordStats(() -> statsCounter)
@@ -124,7 +124,7 @@ public class MemorySegmentIndexesCache implements SegmentIndexesCache {
 
     @Override
     public void configure(final Map<String, ?> configs) {
-        final var config = CacheConfig.newBuilder(configs)
+        final CacheConfig config = CacheConfig.newBuilder(configs)
             .withDefaultSize(DEFAULT_MAX_SIZE_BYTES)
             .build();
         this.cache = buildCache(config);

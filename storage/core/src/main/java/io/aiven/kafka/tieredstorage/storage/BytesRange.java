@@ -22,6 +22,7 @@ import java.util.OptionalInt;
  * Byte range with from and to edges; where `to` cannot be less than `from`
  * --unless to represent empty range where to is -1.
  * Both, `from` and `to`, are inclusive positions.
+ * 基本就是offset + size
  */
 public class BytesRange {
     final int from;

@@ -18,6 +18,7 @@ package io.aiven.kafka.tieredstorage.fetch;
 
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.config.ConfigException;
 
 import io.aiven.kafka.tieredstorage.fetch.cache.ChunkCache;
@@ -33,7 +34,7 @@ class ChunkManagerFactoryConfigTest {
 
     @Test
     void invalidCacheClass() {
-        assertThatThrownBy(() -> new ChunkManagerFactoryConfig(Map.of("fetch.chunk.cache.class", "java.lang.Object")))
+        assertThatThrownBy(() -> new ChunkManagerFactoryConfig(ImmutableMap.of("fetch.chunk.cache.class", "java.lang.Object")))
             .isInstanceOf(ConfigException.class)
             .hasMessage("fetch.chunk.cache.class should be a subclass of " + ChunkCache.class.getCanonicalName());
     }
@@ -45,14 +46,14 @@ class ChunkManagerFactoryConfigTest {
     })
     void validCacheClass(final String cacheClass) {
         final ChunkManagerFactoryConfig config = new ChunkManagerFactoryConfig(
-            Map.of("fetch.chunk.cache.class", cacheClass)
+            ImmutableMap.of("fetch.chunk.cache.class", cacheClass)
         );
         assertThat(config.cacheClass().getCanonicalName()).isEqualTo(cacheClass);
     }
 
     @Test
     void defaultConfig() {
-        final ChunkManagerFactoryConfig config = new ChunkManagerFactoryConfig(Map.of());
+        final ChunkManagerFactoryConfig config = new ChunkManagerFactoryConfig(ImmutableMap.of());
         assertThat(config.cacheClass()).isNull();
     }
 }

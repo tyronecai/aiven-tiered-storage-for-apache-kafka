@@ -17,6 +17,7 @@
 package io.aiven.kafka.tieredstorage.config;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -227,9 +228,8 @@ public class RemoteStorageManagerConfig extends AbstractConfig {
     }
 
     public OptionalInt uploadRateLimit() {
-        return Optional.ofNullable(getInt(UPLOAD_RATE_LIMIT_BYTES_CONFIG)).stream()
-            .mapToInt(Integer::intValue)
-            .findAny();
+        Integer a = getInt(UPLOAD_RATE_LIMIT_BYTES_CONFIG);
+        return a != null ? OptionalInt.of(a) : OptionalInt.empty();
     }
 
     /**
@@ -253,11 +253,11 @@ public class RemoteStorageManagerConfig extends AbstractConfig {
         }
 
         Path encryptionPublicKeyFile(final String keyPairId) {
-            return Path.of(getString(publicKeyFileConfig(keyPairId)));
+            return Paths.get(getString(publicKeyFileConfig(keyPairId)));
         }
 
         Path encryptionPrivateKeyFile(final String keyPairId) {
-            return Path.of(getString(privateKeyFileConfig(keyPairId)));
+            return Paths.get(getString(privateKeyFileConfig(keyPairId)));
         }
 
         public static EncryptionConfig create(final Map<String, ?> props) {

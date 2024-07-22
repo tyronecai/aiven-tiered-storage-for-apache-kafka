@@ -18,6 +18,7 @@ package io.aiven.kafka.tieredstorage.fetch.cache;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.kafka.common.metrics.JmxReporter;
 import org.apache.kafka.common.metrics.KafkaMetricsContext;
 import org.apache.kafka.common.metrics.MetricConfig;
@@ -41,7 +42,7 @@ class DiskChunkCacheMetrics {
         final JmxReporter reporter = new JmxReporter();
 
         metrics = new org.apache.kafka.common.metrics.Metrics(
-            new MetricConfig(), List.of(reporter), time,
+            new MetricConfig(), ImmutableList.of(reporter), time,
             new KafkaMetricsContext("aiven.kafka.server.tieredstorage.cache")
         );
 

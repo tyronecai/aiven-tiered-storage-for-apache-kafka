@@ -16,6 +16,8 @@
 
 package io.aiven.kafka.tieredstorage.manifest.index.serde;
 
+import com.google.common.collect.ImmutableList;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +52,7 @@ import java.util.List;
  *     int originalChunkSize = 1024 * 1024;  // 1 MB
  *     int variability = 300;
  *     List&lt;Integer&gt; chunks = new ArrayList<>();
- *     var random = new Random();
+ *     Random random = new Random();
  *     for (int pos = originalChunkSize; pos < size - originalChunkSize; pos += originalChunkSize) {
  *         chunks.add(originalChunkSize + random.nextInt(variability));
  *     }
@@ -177,11 +179,11 @@ class ChunkSizesBinaryCodec {
         final ByteBuffer buf = ByteBuffer.wrap(array);
         final int count = buf.getInt();
         if (count == 0) {
-            return List.of();
+            return ImmutableList.of();
         }
 
         if (count == 1) {
-            return List.of(buf.getInt());
+            return ImmutableList.of(buf.getInt());
         }
 
         final List<Integer> result = new ArrayList<>();

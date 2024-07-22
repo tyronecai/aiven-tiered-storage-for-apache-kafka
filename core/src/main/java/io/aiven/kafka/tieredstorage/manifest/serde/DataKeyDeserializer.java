@@ -46,7 +46,7 @@ class DataKeyDeserializer extends StdDeserializer<SecretKey> {
         } catch (final IllegalArgumentException e) {
             throw new JsonParseException(p, "Error parsing encrypted data key string", e);
         }
-        final var decryptedKey = keyDecryptor.apply(encryptedDataKey);
+        final byte[] decryptedKey = keyDecryptor.apply(encryptedDataKey);
         return new SecretKeySpec(decryptedKey, "AES");
     }
 }

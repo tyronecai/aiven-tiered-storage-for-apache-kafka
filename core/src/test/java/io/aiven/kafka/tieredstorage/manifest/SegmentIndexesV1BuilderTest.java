@@ -57,7 +57,7 @@ class SegmentIndexesV1BuilderTest {
 
     @Test
     void shouldBuildIndexesWithTransaction() {
-        final var indexes = new SegmentIndexesV1Builder()
+        final SegmentIndexesV1 indexes = new SegmentIndexesV1Builder()
             .add(RemoteStorageManager.IndexType.OFFSET, 1)
             .add(RemoteStorageManager.IndexType.TIMESTAMP, 1)
             .add(RemoteStorageManager.IndexType.PRODUCER_SNAPSHOT, 1)
@@ -73,7 +73,7 @@ class SegmentIndexesV1BuilderTest {
 
     @Test
     void shouldBuildIndexesWithoutTransaction() {
-        final var indexes = new SegmentIndexesV1Builder()
+        final SegmentIndexesV1 indexes = new SegmentIndexesV1Builder()
             .add(RemoteStorageManager.IndexType.OFFSET, 1)
             .add(RemoteStorageManager.IndexType.TIMESTAMP, 1)
             .add(RemoteStorageManager.IndexType.PRODUCER_SNAPSHOT, 1)
@@ -88,7 +88,7 @@ class SegmentIndexesV1BuilderTest {
 
     @Test
     void shouldBuildWithEmptyIndex() {
-        final var indexes = new SegmentIndexesV1Builder()
+        final SegmentIndexesV1 indexes = new SegmentIndexesV1Builder()
             .add(RemoteStorageManager.IndexType.OFFSET, 0)
             .add(RemoteStorageManager.IndexType.TIMESTAMP, 1)
             .add(RemoteStorageManager.IndexType.PRODUCER_SNAPSHOT, 0)

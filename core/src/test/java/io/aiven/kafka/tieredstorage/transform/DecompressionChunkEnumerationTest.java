@@ -42,7 +42,7 @@ class DecompressionChunkEnumerationTest {
 
     @Test
     void hasMoreElementsPropagated() {
-        final var transform = new DecompressionChunkEnumeration(inner);
+        final DecompressionChunkEnumeration transform = new DecompressionChunkEnumeration(inner);
         when(inner.hasMoreElements())
             .thenReturn(true)
             .thenReturn(false);
@@ -60,7 +60,7 @@ class DecompressionChunkEnumerationTest {
             compressed = compressCtx.compress(data);
         }
 
-        final var transform = new DecompressionChunkEnumeration(inner);
+        final DecompressionChunkEnumeration transform = new DecompressionChunkEnumeration(inner);
         when(inner.nextElement()).thenReturn(compressed);
 
         assertThat(transform.nextElement()).isEqualTo(data);

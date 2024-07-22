@@ -19,11 +19,14 @@ package io.aiven.kafka.tieredstorage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.ClosedByInterruptException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.TopicIdPartition;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.Uuid;
@@ -59,7 +62,7 @@ class RemoteStorageManagerTest {
     static final long START_OFFSET = 23L;
     static final RemoteLogSegmentMetadata REMOTE_LOG_METADATA = new RemoteLogSegmentMetadata(
         REMOTE_SEGMENT_ID, START_OFFSET, 2000L,
-        0, 0, 0, SEGMENT_SIZE, Map.of(0, 0L));
+        0, 0, 0, SEGMENT_SIZE, ImmutableMap.of(0, 0L));
 
     RemoteStorageManager rsm;
 
@@ -71,7 +74,7 @@ class RemoteStorageManagerTest {
     void init() throws IOException {
         rsm = new RemoteStorageManager();
 
-        targetDir = Path.of(tmpDir.toString(), "target/");
+        targetDir = Paths.get(tmpDir.toString(), "target/");
         Files.createDirectories(targetDir);
     }
 
@@ -90,7 +93,7 @@ class RemoteStorageManagerTest {
             }
         });
 
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "chunk.size", "1",
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "storage.root", targetDir.toString()
@@ -121,7 +124,7 @@ class RemoteStorageManagerTest {
             }
         });
 
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "chunk.size", "1",
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "storage.root", targetDir.toString()
@@ -168,7 +171,7 @@ class RemoteStorageManagerTest {
             }
         });
 
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "chunk.size", "1",
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "storage.root", targetDir.toString()
@@ -208,7 +211,7 @@ class RemoteStorageManagerTest {
             }
         });
 
-        final var config = Map.of(
+        final Map<String, String> config = ImmutableMap.of(
             "chunk.size", "1",
             "storage.backend.class", "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
             "storage.root", targetDir.toString()
@@ -252,6 +255,6 @@ class RemoteStorageManagerTest {
         final Path manifestPath = targetDir.resolve(
             objectKeyFactory.key(REMOTE_LOG_METADATA, ObjectKeyFactory.Suffix.MANIFEST).value());
         Files.createDirectories(manifestPath.getParent());
-        Files.writeString(manifestPath, manifest);
+        Files.write(manifestPath, manifest.getBytes(StandardCharsets.UTF_8));
     }
 }

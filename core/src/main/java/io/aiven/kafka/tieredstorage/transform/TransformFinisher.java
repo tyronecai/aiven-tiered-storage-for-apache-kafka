@@ -83,7 +83,7 @@ public class TransformFinisher implements Enumeration<InputStream> {
 
     @Override
     public InputStream nextElement() {
-        final var chunk = inner.nextElement();
+        final byte[] chunk = inner.nextElement();
         if (chunkIndexBuilder != null) {
             if (hasMoreElements()) {
                 this.chunkIndexBuilder.addChunk(chunk.length);

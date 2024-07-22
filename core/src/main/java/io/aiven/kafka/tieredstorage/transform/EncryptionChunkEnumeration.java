@@ -64,8 +64,8 @@ public class EncryptionChunkEnumeration implements TransformChunkEnumeration {
 
     @Override
     public byte[] nextElement() {
-        final var cipher = cipherSupplier.get();
-        final var chunk = inner.nextElement();
+        final Cipher cipher = cipherSupplier.get();
+        final byte[] chunk = inner.nextElement();
         final byte[] iv = cipher.getIV();
         final int transformedChunkSize = encryptedChunkSize(cipher, iv.length, chunk.length);
         final byte[] transformedChunk = new byte[transformedChunkSize];

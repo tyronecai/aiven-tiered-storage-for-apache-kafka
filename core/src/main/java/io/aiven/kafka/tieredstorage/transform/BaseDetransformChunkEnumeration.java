@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import io.aiven.kafka.tieredstorage.Chunk;
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
 
 /**
  * The base chunk de-transformation that does the initial chunking of the input stream of bytes.
@@ -69,7 +70,7 @@ public class BaseDetransformChunkEnumeration implements DetransformChunkEnumerat
             throw new NoSuchElementException();
         }
 
-        final var result = chunk;
+        final byte[] result = chunk;
         chunk = null;
         return result;
     }
@@ -101,12 +102,12 @@ public class BaseDetransformChunkEnumeration implements DetransformChunkEnumerat
         try {
             if (!isEmpty) {
                 final int expectedTransformedSize = chunksIter.next().transformedSize;
-                chunk = inputStream.readNBytes(expectedTransformedSize);
+                chunk = IO2Utils.readNBytes(inputStream, expectedTransformedSize);
                 if (chunk.length < expectedTransformedSize) {
                     throw new RuntimeException("Stream has fewer bytes than expected");
                 }
             } else {
-                chunk = inputStream.readAllBytes();
+                chunk = IO2Utils.toByteArray(inputStream);
             }
         } catch (final IOException e) {
             throw new RuntimeException(e);

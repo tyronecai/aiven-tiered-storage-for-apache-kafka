@@ -49,8 +49,8 @@ public class SegmentManifestProvider {
                                    final ObjectFetcher fileFetcher,
                                    final ObjectMapper mapper,
                                    final Executor executor) {
-        final var statsCounter = new CaffeineStatsCounter(SEGMENT_MANIFEST_METRIC_GROUP_NAME);
-        final var cacheBuilder = Caffeine.newBuilder()
+        final CaffeineStatsCounter statsCounter = new CaffeineStatsCounter(SEGMENT_MANIFEST_METRIC_GROUP_NAME);
+        final Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder()
             .recordStats(() -> statsCounter)
             .executor(executor);
         maxCacheSize.ifPresent(cacheBuilder::maximumSize);

@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.TopicIdPartition;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.Uuid;
@@ -50,6 +51,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,7 +92,7 @@ class RemoteStorageManagerMetricsTest {
         final Path target = tmpDir.resolve("target");
         Files.createDirectories(target);
 
-        configs = Map.of(
+        configs = ImmutableMap.of(
             "chunk.size", "123",
             "storage.backend.class",
             "io.aiven.kafka.tieredstorage.storage.filesystem.FileSystemStorage",
@@ -106,7 +108,7 @@ class RemoteStorageManagerMetricsTest {
         final Path sourceFile = source.resolve("file");
         Files.write(sourceFile, new byte[LOG_SEGMENT_BYTES]);
 
-        final var leaderEpoch = ByteBuffer.wrap(new byte[LOG_SEGMENT_BYTES]);
+        final ByteBuffer leaderEpoch = ByteBuffer.wrap(new byte[LOG_SEGMENT_BYTES]);
         logSegmentData = new LogSegmentData(
             sourceFile, sourceFile, sourceFile, Optional.empty(), sourceFile,
             leaderEpoch
@@ -125,7 +127,7 @@ class RemoteStorageManagerMetricsTest {
         rsm.copyLogSegmentData(REMOTE_LOG_SEGMENT_METADATA, logSegmentData);
         logSegmentData.leaderEpochIndex().flip();
 
-        final var objectName = "aiven.kafka.server.tieredstorage:type=remote-storage-manager-metrics" + tags;
+        final String objectName = "aiven.kafka.server.tieredstorage:type=remote-storage-manager-metrics" + tags;
         final ObjectName metricName = ObjectName.getInstance(objectName);
 
         // upload related metrics
@@ -144,7 +146,7 @@ class RemoteStorageManagerMetricsTest {
         assertThat(MBEAN_SERVER.getAttribute(metricName, "object-upload-bytes-rate"))
             .isEqualTo(2160.0 / METRIC_TIME_WINDOW_SEC);
 
-        for (final var suffix : ObjectKeyFactory.Suffix.values()) {
+        for (final ObjectKeyFactory.Suffix suffix : ObjectKeyFactory.Suffix.values()) {
             final ObjectName storageMetricsName = ObjectName.getInstance(objectName + ",object-type=" + suffix.value);
             assertThat(MBEAN_SERVER.getAttribute(storageMetricsName, "object-upload-rate"))
                 .isEqualTo(3.0 / METRIC_TIME_WINDOW_SEC);
@@ -159,7 +161,7 @@ class RemoteStorageManagerMetricsTest {
         }
 
         // fetch related metrics
-        final var segmentManifestCacheObjectName =
+        final ObjectName segmentManifestCacheObjectName =
             new ObjectName("aiven.kafka.server.tieredstorage.cache:type=segment-manifest-cache-metrics");
 
         rsm.fetchLogSegment(REMOTE_LOG_SEGMENT_METADATA, 0);
@@ -221,8 +223,8 @@ class RemoteStorageManagerMetricsTest {
     @ParameterizedTest
     @ValueSource(strings = {"", ",topic=topic", ",topic=topic,partition=0"})
     void metricsErrorsShouldBeReported(final String tags) throws JMException {
-        final var testException = new StorageBackendException("something wrong");
-        try (@SuppressWarnings("unused") final var storage = mockConstruction(
+        final StorageBackendException testException = new StorageBackendException("something wrong");
+        try (@SuppressWarnings("unused") final MockedConstruction<FileSystemStorage> storage = mockConstruction(
             FileSystemStorage.class,
             (mock, context) -> {
                 doThrow(testException).when(mock).upload(any(), any());

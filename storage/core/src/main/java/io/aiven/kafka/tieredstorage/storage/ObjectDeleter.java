@@ -32,7 +32,7 @@ public interface ObjectDeleter {
      * <p>If the object doesn't exist, the operation still succeeds as it is idempotent.
      */
     default void delete(Set<ObjectKey> keys) throws StorageBackendException {
-        for (final var key : keys) {
+        for (final ObjectKey key : keys) {
             delete(key);
         }
     }

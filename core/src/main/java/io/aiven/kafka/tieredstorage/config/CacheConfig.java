@@ -34,7 +34,7 @@ public class CacheConfig extends AbstractConfig {
     private static final long DEFAULT_CACHE_RETENTION_MS = 600_000;
 
     private static ConfigDef configDef(final Object defaultSize) {
-        final var configDef = new ConfigDef();
+        final ConfigDef configDef = new ConfigDef();
         configDef.define(
             CACHE_SIZE_CONFIG,
             ConfigDef.Type.LONG,

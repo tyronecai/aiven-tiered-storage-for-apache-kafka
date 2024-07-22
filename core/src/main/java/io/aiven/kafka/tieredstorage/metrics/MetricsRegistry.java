@@ -18,6 +18,7 @@ package io.aiven.kafka.tieredstorage.metrics;
 
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.MetricNameTemplate;
 import org.apache.kafka.common.TopicPartition;
 
@@ -222,19 +223,19 @@ public class MetricsRegistry {
     }
 
     static Map<String, String> topicTags(final TopicPartition topicPartition) {
-        return Map.of(TAG_NAME_TOPIC, topicPartition.topic());
+        return ImmutableMap.of(TAG_NAME_TOPIC, topicPartition.topic());
     }
 
     static Map<String, String> topicAndObjectTypeTags(final TopicPartition topicPartition,
                                                       final ObjectKeyFactory.Suffix suffix) {
-        return Map.of(
+        return ImmutableMap.of(
             TAG_NAME_TOPIC, topicPartition.topic(),
             TAG_NAME_OBJECT_TYPE, suffix.value
         );
     }
 
     static Map<String, String> topicPartitionTags(final TopicPartition topicPartition) {
-        return Map.of(
+        return ImmutableMap.of(
             TAG_NAME_TOPIC, topicPartition.topic(),
             TAG_NAME_PARTITION, String.valueOf(topicPartition.partition())
         );
@@ -242,7 +243,7 @@ public class MetricsRegistry {
 
     static Map<String, String> topicPartitionAndObjectTypeTags(final TopicPartition topicPartition,
                                                                final ObjectKeyFactory.Suffix suffix) {
-        return Map.of(
+        return ImmutableMap.of(
             TAG_NAME_TOPIC, topicPartition.topic(),
             TAG_NAME_PARTITION, String.valueOf(topicPartition.partition()),
             TAG_NAME_OBJECT_TYPE, suffix.value
@@ -250,6 +251,6 @@ public class MetricsRegistry {
     }
 
     static Map<String, String> objectTypeTags(final ObjectKeyFactory.Suffix suffix) {
-        return Map.of(TAG_NAME_OBJECT_TYPE, suffix.value);
+        return ImmutableMap.of(TAG_NAME_OBJECT_TYPE, suffix.value);
     }
 }

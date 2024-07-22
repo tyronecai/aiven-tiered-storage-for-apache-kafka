@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.common.collect.ImmutableList;
 import io.aiven.kafka.tieredstorage.Chunk;
 import io.aiven.kafka.tieredstorage.manifest.SegmentEncryptionMetadata;
 import io.aiven.kafka.tieredstorage.manifest.SegmentManifest;
@@ -53,7 +54,7 @@ public class DefaultChunkManager implements ChunkManager {
 
         final InputStream chunkContent = fetcher.fetch(objectKey, chunk.range());
 
-        DetransformChunkEnumeration detransformEnum = new BaseDetransformChunkEnumeration(chunkContent, List.of(chunk));
+        DetransformChunkEnumeration detransformEnum = new BaseDetransformChunkEnumeration(chunkContent, ImmutableList.of(chunk));
         final Optional<SegmentEncryptionMetadata> encryptionMetadata = manifest.encryption();
         if (encryptionMetadata.isPresent()) {
             detransformEnum = new DecryptionChunkEnumeration(

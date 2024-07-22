@@ -17,8 +17,10 @@
 package io.aiven.kafka.tieredstorage.metadata;
 
 import java.util.Collections;
+import java.util.NavigableMap;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import org.apache.kafka.common.TopicIdPartition;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.Uuid;
@@ -47,7 +49,7 @@ class SegmentCustomMetadataBuilderTest {
 
     @Test
     void shouldBuildEmptyMap() {
-        final var b = new SegmentCustomMetadataBuilder(Set.of(), OBJECT_KEY_FACTORY, REMOTE_LOG_SEGMENT_METADATA);
+        final SegmentCustomMetadataBuilder b = new SegmentCustomMetadataBuilder(ImmutableSet.of(), OBJECT_KEY_FACTORY, REMOTE_LOG_SEGMENT_METADATA);
         assertThat(b.build()).isEmpty();
 
         // even when upload results are added
@@ -57,7 +59,7 @@ class SegmentCustomMetadataBuilderTest {
 
     @Test
     void shouldFailWhenAddingExistingSuffixUploadResult() {
-        final var b = new SegmentCustomMetadataBuilder(Set.of(), OBJECT_KEY_FACTORY, REMOTE_LOG_SEGMENT_METADATA);
+        final SegmentCustomMetadataBuilder b = new SegmentCustomMetadataBuilder(ImmutableSet.of(), OBJECT_KEY_FACTORY, REMOTE_LOG_SEGMENT_METADATA);
 
         b.addUploadResult(ObjectKeyFactory.Suffix.MANIFEST, 10L);
         assertThatThrownBy(() -> b.addUploadResult(ObjectKeyFactory.Suffix.MANIFEST, 20L))
@@ -67,9 +69,9 @@ class SegmentCustomMetadataBuilderTest {
 
     @Test
     void shouldIncludeTotalSize() {
-        final var field = SegmentCustomMetadataField.REMOTE_SIZE;
-        final var b = new SegmentCustomMetadataBuilder(Set.of(field), OBJECT_KEY_FACTORY, REMOTE_LOG_SEGMENT_METADATA);
-        var fields = b.build();
+        final SegmentCustomMetadataField field = SegmentCustomMetadataField.REMOTE_SIZE;
+        final SegmentCustomMetadataBuilder b = new SegmentCustomMetadataBuilder(ImmutableSet.of(field), OBJECT_KEY_FACTORY, REMOTE_LOG_SEGMENT_METADATA);
+        NavigableMap<Integer, Object> fields = b.build();
         assertThat(fields)
             .containsExactly(entry(field.index, 0L)); // i.e. no upload results
 
@@ -84,18 +86,18 @@ class SegmentCustomMetadataBuilderTest {
 
     @Test
     void shouldIncludeObjectPrefix() {
-        final var field = SegmentCustomMetadataField.OBJECT_PREFIX;
-        final var b = new SegmentCustomMetadataBuilder(Set.of(field), OBJECT_KEY_FACTORY, REMOTE_LOG_SEGMENT_METADATA);
-        final var fields = b.build();
+        final SegmentCustomMetadataField field = SegmentCustomMetadataField.OBJECT_PREFIX;
+        final SegmentCustomMetadataBuilder b = new SegmentCustomMetadataBuilder(ImmutableSet.of(field), OBJECT_KEY_FACTORY, REMOTE_LOG_SEGMENT_METADATA);
+        final NavigableMap<Integer, Object> fields = b.build();
         assertThat(fields)
             .containsExactly(entry(field.index, "p1"));
     }
 
     @Test
     void shouldIncludeObjectKey() {
-        final var field = SegmentCustomMetadataField.OBJECT_KEY;
-        final var b = new SegmentCustomMetadataBuilder(Set.of(field), OBJECT_KEY_FACTORY, REMOTE_LOG_SEGMENT_METADATA);
-        final var fields = b.build();
+        final SegmentCustomMetadataField field = SegmentCustomMetadataField.OBJECT_KEY;
+        final SegmentCustomMetadataBuilder b = new SegmentCustomMetadataBuilder(ImmutableSet.of(field), OBJECT_KEY_FACTORY, REMOTE_LOG_SEGMENT_METADATA);
+        final NavigableMap<Integer, Object> fields = b.build();
         assertThat(fields)
             .containsExactly(entry(field.index, "topic-" + TOPIC_ID + "/0/00000000000000000001-" + SEGMENT_ID));
     }

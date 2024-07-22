@@ -23,8 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FixedSizeChunkIndexEqualsTest {
     @Test
     void identical() {
-        final var i1 = new FixedSizeChunkIndex(100, 1000, 110, 10);
-        final var i2 = new FixedSizeChunkIndex(100, 1000, 110, 10);
+        final FixedSizeChunkIndex i1 = new FixedSizeChunkIndex(100, 1000, 110, 10);
+        final FixedSizeChunkIndex i2 = new FixedSizeChunkIndex(100, 1000, 110, 10);
         assertThat(i1).isEqualTo(i2);
         assertThat(i2).isEqualTo(i1);
         assertThat(i1).hasSameHashCodeAs(i2);
@@ -32,8 +32,8 @@ class FixedSizeChunkIndexEqualsTest {
 
     @Test
     void differentOriginalChunkSize() {
-        final var i1 = new FixedSizeChunkIndex(100, 1000, 110, 10);
-        final var i2 = new FixedSizeChunkIndex(101, 1000, 110, 10);
+        final FixedSizeChunkIndex i1 = new FixedSizeChunkIndex(100, 1000, 110, 10);
+        final FixedSizeChunkIndex i2 = new FixedSizeChunkIndex(101, 1000, 110, 10);
         assertThat(i1).isNotEqualTo(i2);
         assertThat(i2).isNotEqualTo(i1);
         assertThat(i1).doesNotHaveSameHashCodeAs(i2);
@@ -41,8 +41,8 @@ class FixedSizeChunkIndexEqualsTest {
 
     @Test
     void differentOriginalFileSize() {
-        final var i1 = new FixedSizeChunkIndex(100, 1000, 110, 10);
-        final var i2 = new FixedSizeChunkIndex(100, 1001, 110, 10);
+        final FixedSizeChunkIndex i1 = new FixedSizeChunkIndex(100, 1000, 110, 10);
+        final FixedSizeChunkIndex i2 = new FixedSizeChunkIndex(100, 1001, 110, 10);
         assertThat(i1).isNotEqualTo(i2);
         assertThat(i2).isNotEqualTo(i1);
         assertThat(i1).doesNotHaveSameHashCodeAs(i2);
@@ -50,8 +50,8 @@ class FixedSizeChunkIndexEqualsTest {
 
     @Test
     void differentTransformedChunkSize() {
-        final var i1 = new FixedSizeChunkIndex(100, 1000, 110, 10);
-        final var i2 = new FixedSizeChunkIndex(100, 1000, 111, 10);
+        final FixedSizeChunkIndex i1 = new FixedSizeChunkIndex(100, 1000, 110, 10);
+        final FixedSizeChunkIndex i2 = new FixedSizeChunkIndex(100, 1000, 111, 10);
         assertThat(i1).isNotEqualTo(i2);
         assertThat(i2).isNotEqualTo(i1);
         assertThat(i1).doesNotHaveSameHashCodeAs(i2);
@@ -59,8 +59,8 @@ class FixedSizeChunkIndexEqualsTest {
 
     @Test
     void differentFinalTransformedChunkSize() {
-        final var i1 = new FixedSizeChunkIndex(100, 1000, 110, 10);
-        final var i2 = new FixedSizeChunkIndex(100, 1000, 110, 11);
+        final FixedSizeChunkIndex i1 = new FixedSizeChunkIndex(100, 1000, 110, 10);
+        final FixedSizeChunkIndex i2 = new FixedSizeChunkIndex(100, 1000, 110, 11);
         assertThat(i1).isNotEqualTo(i2);
         assertThat(i2).isNotEqualTo(i1);
         assertThat(i1).doesNotHaveSameHashCodeAs(i2);

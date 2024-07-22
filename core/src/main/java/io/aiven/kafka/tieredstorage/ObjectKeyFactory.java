@@ -102,8 +102,8 @@ public final class ObjectKeyFactory {
         Objects.requireNonNull(remoteLogSegmentMetadata, "remoteLogSegmentMetadata cannot be null");
         Objects.requireNonNull(suffix, "suffix cannot be null");
 
-        final var prefix = (String) fields.getOrDefault(OBJECT_PREFIX.index(), this.prefix);
-        final var main = (String) fields.getOrDefault(OBJECT_KEY.index(), mainPath(remoteLogSegmentMetadata));
+        final String prefix = (String) fields.getOrDefault(OBJECT_PREFIX.index(), this.prefix);
+        final String main = (String) fields.getOrDefault(OBJECT_KEY.index(), mainPath(remoteLogSegmentMetadata));
         return objectKeyConstructor.apply(prefix, main + "." + suffix.value);
     }
 
@@ -184,7 +184,7 @@ public final class ObjectKeyFactory {
 
         @Override
         public String toString() {
-            return value();
+            return prefix + mainPathAndSuffix;
         }
     }
 
@@ -198,6 +198,7 @@ public final class ObjectKeyFactory {
             super(prefix, mainPathAndSuffix);
         }
 
+        // 和 PlainObjectKey 区别在于，不打印 prefix，而是打印 "<prefix>/"
         @Override
         public String toString() {
             return "<prefix>/" + mainPathAndSuffix;

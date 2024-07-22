@@ -50,14 +50,14 @@ public class VariableSizeChunkIndexBuilderTest extends ChunkIndexBuilderCommonTe
         [101-202) - size 101  |  [33-55) - size 22
         [202-253) - size 51   |  [55-60) - size 5
         */
-        final var builder = new VariableSizeChunkIndexBuilder(101, 253);
+        final VariableSizeChunkIndexBuilder builder = new VariableSizeChunkIndexBuilder(101, 253);
         builder.addChunk(33);
         builder.addChunk(22);
         final ChunkIndex index = builder.finish(5);
 
-        final var transformedChunk1 = new Chunk(0, 0, 101, 0, 33);
-        final var transformedChunk2 = new Chunk(1, 101, 101, 33, 22);
-        final var transformedChunk3 = new Chunk(2, 202, 51, 55, 5);
+        final Chunk transformedChunk1 = new Chunk(0, 0, 101, 0, 33);
+        final Chunk transformedChunk2 = new Chunk(1, 101, 101, 33, 22);
+        final Chunk transformedChunk3 = new Chunk(2, 202, 51, 55, 5);
 
         assertThat(index.chunks()).containsExactly(transformedChunk1, transformedChunk2, transformedChunk3);
 

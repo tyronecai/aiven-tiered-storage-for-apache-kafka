@@ -18,13 +18,14 @@ package io.aiven.kafka.tieredstorage.transform;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import io.aiven.kafka.tieredstorage.Chunk;
 import io.aiven.kafka.tieredstorage.manifest.index.ChunkIndex;
 import io.aiven.kafka.tieredstorage.manifest.index.FixedSizeChunkIndex;
 import io.aiven.kafka.tieredstorage.manifest.index.VariableSizeChunkIndex;
 
+import io.aiven.kafka.tieredstorage.utils.IO2Utils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -68,11 +69,11 @@ class TransformFinisherTest {
                                                 final Class<ChunkIndex> indexType) throws IOException {
         final TransformFinisher finisher = new TransformFinisher(new FakeDataEnumerator(transformedChunkSize), 7, null);
         assertThat(finisher.hasMoreElements()).isTrue();
-        assertThat(finisher.nextElement().readAllBytes()).isEqualTo(new byte[] {0, 1, 2});
+        assertThat(IO2Utils.toByteArray(finisher.nextElement())).isEqualTo(new byte[] {0, 1, 2});
         assertThat(finisher.hasMoreElements()).isTrue();
-        assertThat(finisher.nextElement().readAllBytes()).isEqualTo(new byte[] {3, 4, 5});
+        assertThat(IO2Utils.toByteArray(finisher.nextElement())).isEqualTo(new byte[] {3, 4, 5});
         assertThat(finisher.hasMoreElements()).isTrue();
-        assertThat(finisher.nextElement().readAllBytes()).isEqualTo(new byte[] {6});
+        assertThat(IO2Utils.toByteArray(finisher.nextElement())).isEqualTo(new byte[] {6});
         assertThat(finisher.hasMoreElements()).isFalse();
 
         final ChunkIndex chunkIndex = finisher.chunkIndex();
@@ -94,7 +95,7 @@ class TransformFinisherTest {
     private static class FakeDataEnumerator implements TransformChunkEnumeration {
         private final Integer transformedChunkSize;
 
-        private final Iterator<byte[]> iter = List.of(
+        private final Iterator<byte[]> iter = ImmutableList.of(
             new byte[] {0, 1, 2},
             new byte[] {3, 4, 5},
             new byte[] {6}

@@ -17,8 +17,10 @@
 package io.aiven.kafka.tieredstorage.storage.filesystem;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,9 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FileSystemStorageConfigTest {
     @Test
     void minimalConfig() {
-        final FileSystemStorageConfig config = new FileSystemStorageConfig(Map.of(
+        final FileSystemStorageConfig config = new FileSystemStorageConfig(ImmutableMap.of(
             "root", "."
         ));
-        assertThat(config.root()).isEqualTo(Path.of("."));
+        assertThat(config.root()).isEqualTo(Paths.get("."));
     }
 }

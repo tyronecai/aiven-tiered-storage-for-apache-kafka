@@ -19,6 +19,7 @@ package io.aiven.kafka.tieredstorage.fetch.cache;
 import java.time.Duration;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
 
@@ -33,7 +34,7 @@ class ChunkCacheConfigTest {
     void defaults() {
         final ChunkCacheConfig config = new ChunkCacheConfig(
             new ConfigDef(),
-            Map.of("size", "-1")
+            ImmutableMap.of("size", "-1")
         );
 
         assertThat(config.cacheRetention()).hasValue(Duration.ofMinutes(10));
@@ -44,7 +45,7 @@ class ChunkCacheConfigTest {
     void cacheSizeUnbounded() {
         final ChunkCacheConfig config = new ChunkCacheConfig(
             new ConfigDef(),
-            Map.of("size", "-1")
+            ImmutableMap.of("size", "-1")
         );
         assertThat(config.cacheSize()).isEmpty();
     }
@@ -53,7 +54,7 @@ class ChunkCacheConfigTest {
     void cacheSizeBounded() {
         final ChunkCacheConfig config = new ChunkCacheConfig(
             new ConfigDef(),
-            Map.of("size", "1024")
+            ImmutableMap.of("size", "1024")
         );
         assertThat(config.cacheSize()).hasValue(1024L);
     }
@@ -62,7 +63,7 @@ class ChunkCacheConfigTest {
     void invalidCacheSize() {
         assertThatThrownBy(() -> new ChunkCacheConfig(
             new ConfigDef(),
-            Map.of("size", "-2")
+            ImmutableMap.of("size", "-2")
         )).isInstanceOf(ConfigException.class)
             .hasMessage("Invalid value -2 for configuration size: Value must be at least -1");
     }
@@ -71,7 +72,7 @@ class ChunkCacheConfigTest {
     void cacheSizeUnspecified() {
         assertThatThrownBy(() -> new ChunkCacheConfig(
             new ConfigDef(),
-            Map.of()
+            ImmutableMap.of()
         )).isInstanceOf(ConfigException.class)
             .hasMessage("Missing required configuration \"size\" which has no default value.");
     }
@@ -80,7 +81,7 @@ class ChunkCacheConfigTest {
     void cacheRetentionForever() {
         final ChunkCacheConfig config = new ChunkCacheConfig(
             new ConfigDef(),
-            Map.of(
+            ImmutableMap.of(
                 "retention.ms", "-1",
                 "size", "-1"
             )
@@ -92,7 +93,7 @@ class ChunkCacheConfigTest {
     void cacheRetentionLimited() {
         final ChunkCacheConfig config = new ChunkCacheConfig(
             new ConfigDef(),
-            Map.of(
+            ImmutableMap.of(
                 "retention.ms", "60000",
                 "size", "-1"
             )
@@ -104,7 +105,7 @@ class ChunkCacheConfigTest {
     void invalidRetention() {
         assertThatThrownBy(() -> new ChunkCacheConfig(
             new ConfigDef(),
-            Map.of(
+            ImmutableMap.of(
                 "retention.ms", "-2",
                 "size", "-1"
             )
@@ -116,7 +117,7 @@ class ChunkCacheConfigTest {
     void invalidPrefetchingSize() {
         assertThatThrownBy(() -> new ChunkCacheConfig(
             new ConfigDef(),
-            Map.of(
+            ImmutableMap.of(
                 "size", "-1",
                 "prefetch.max.size", "-1"
             )

@@ -41,7 +41,7 @@ public class DetransformFinisher implements Enumeration<InputStream> {
 
     @Override
     public InputStream nextElement() {
-        final var chunk = inner.nextElement();
+        final byte[] chunk = inner.nextElement();
         return new ByteArrayInputStream(chunk);
     }
 

@@ -16,6 +16,7 @@
 
 package io.aiven.kafka.tieredstorage.metadata;
 
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import org.apache.kafka.common.protocol.types.SchemaException;
@@ -30,21 +31,21 @@ class SegmentCustomMetadataSerdeTest {
 
     @Test
     void shouldSerDeEmptyFields() {
-        final var bytes = serde.serialize(new TreeMap<>());
+        final byte[] bytes = serde.serialize(new TreeMap<>());
         assertThat(bytes).isEqualTo(new byte[] {});
-        final var fields = serde.deserialize(bytes);
+        final NavigableMap<Integer, Object> fields = serde.deserialize(bytes);
         assertThat(fields).isEmpty();
     }
 
     @Test
     void shouldSerDeSomeFields() {
-        final var input = new TreeMap<Integer, Object>();
+        final TreeMap<Integer, Object> input = new TreeMap<>();
         input.put(0, 100L); // remote_size
         input.put(2, "foo"); // object_key
 
-        final var bytes = serde.serialize(input);
+        final byte[] bytes = serde.serialize(input);
         assertThat(bytes).hasSize(11); // calculated on the first run
-        final var fields = serde.deserialize(bytes);
+        final NavigableMap<Integer, Object> fields = serde.deserialize(bytes);
         assertThat(fields).hasSize(2)
             .containsEntry(0, 100L)
             .containsEntry(2, "foo");
@@ -52,7 +53,7 @@ class SegmentCustomMetadataSerdeTest {
 
     @Test
     void shouldFailWhenWrongType() {
-        final var input = new TreeMap<Integer, Object>();
+        final TreeMap<Integer, Object> input = new TreeMap<>();
         input.put(0, "foo"); // remote_size with wrong type
 
         assertThatThrownBy(() -> serde.serialize(input))
@@ -61,7 +62,7 @@ class SegmentCustomMetadataSerdeTest {
 
     @Test
     void shouldFailWhenUnknownLocation() {
-        final var input = new TreeMap<Integer, Object>();
+        final TreeMap<Integer, Object> input = new TreeMap<>();
         input.put(SegmentCustomMetadataField.values().length + 1, "foo"); // unknown location
 
         assertThatThrownBy(() -> serde.serialize(input))
