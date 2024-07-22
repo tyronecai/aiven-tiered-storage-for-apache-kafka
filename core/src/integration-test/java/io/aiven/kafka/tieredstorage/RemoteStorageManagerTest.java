@@ -58,7 +58,6 @@ import io.aiven.kafka.tieredstorage.manifest.SegmentIndexesV1Builder;
 import io.aiven.kafka.tieredstorage.manifest.index.ChunkIndex;
 import io.aiven.kafka.tieredstorage.manifest.serde.EncryptionSerdeModule;
 import io.aiven.kafka.tieredstorage.manifest.serde.KafkaTypeSerdeModule;
-import io.aiven.kafka.tieredstorage.metadata.SegmentCustomMetadataField;
 import io.aiven.kafka.tieredstorage.metadata.SegmentCustomMetadataSerde;
 import io.aiven.kafka.tieredstorage.security.AesEncryptionProvider;
 import io.aiven.kafka.tieredstorage.security.DataKeyAndAAD;
@@ -69,7 +68,6 @@ import io.aiven.kafka.tieredstorage.storage.KeyNotFoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.luben.zstd.Zstd;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -222,12 +220,9 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
         final LogSegmentData logSegmentData = new LogSegmentData(
             logFilePath, offsetIndexFilePath, timeIndexFilePath, txnIndexPath,
             producerSnapshotFilePath, ByteBuffer.wrap(LEADER_EPOCH_INDEX_BYTES));
-        final Optional<RemoteLogSegmentMetadata.CustomMetadata> customMetadata;
         try (final AllOpenedFileInputStreamsAreClosedChecker checker = new AllOpenedFileInputStreamsAreClosedChecker()) {
-            customMetadata = rsm.copyLogSegmentData(REMOTE_LOG_METADATA, logSegmentData);
+            rsm.copyLogSegmentData(REMOTE_LOG_METADATA, logSegmentData);
         }
-        assertThat(customMetadata).isPresent();
-        checkCustomMetadata(customMetadata.get());
         checkFilesInTargetDirectory();
         checkManifest(chunkSize, compression, encryption);
         if (encryption) {
@@ -236,20 +231,6 @@ class RemoteStorageManagerTest extends RsaKeyAwareTest {
         checkIndexContents(hasTxnIndex);
         checkFetching(chunkSize);
         checkDeletion();
-    }
-
-    private void checkCustomMetadata(final RemoteLogSegmentMetadata.CustomMetadata customMetadata) {
-        final NavigableMap<Integer, Object> fields = CUSTOM_METADATA_SERDE.deserialize(customMetadata.value());
-        assertThat(fields).hasSize(3);
-        assertThat(fields.get(SegmentCustomMetadataField.REMOTE_SIZE.index()))
-            .asInstanceOf(InstanceOfAssertFactories.LONG)
-            .isGreaterThan(0);
-        assertThat(fields.get(SegmentCustomMetadataField.OBJECT_KEY.index()))
-            .asInstanceOf(InstanceOfAssertFactories.STRING)
-            .isNotEmpty();
-        assertThat(fields.get(SegmentCustomMetadataField.OBJECT_PREFIX.index()))
-            .asInstanceOf(InstanceOfAssertFactories.STRING)
-            .isNotEmpty();
     }
 
     private void checkFilesInTargetDirectory() {

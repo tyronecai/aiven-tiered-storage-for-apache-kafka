@@ -39,7 +39,6 @@ import org.apache.kafka.common.utils.ByteBufferInputStream;
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.server.log.remote.storage.LogSegmentData;
 import org.apache.kafka.server.log.remote.storage.RemoteLogSegmentMetadata;
-import org.apache.kafka.server.log.remote.storage.RemoteLogSegmentMetadata.CustomMetadata;
 import org.apache.kafka.server.log.remote.storage.RemoteResourceNotFoundException;
 import org.apache.kafka.server.log.remote.storage.RemoteStorageException;
 
@@ -210,7 +209,7 @@ public class RemoteStorageManager implements org.apache.kafka.server.log.remote.
     }
 
     @Override
-    public Optional<CustomMetadata> copyLogSegmentData(final RemoteLogSegmentMetadata remoteLogSegmentMetadata,
+    public void copyLogSegmentData(final RemoteLogSegmentMetadata remoteLogSegmentMetadata,
                                                        final LogSegmentData logSegmentData)
         throws RemoteStorageException {
         Objects.requireNonNull(remoteLogSegmentMetadata, "remoteLogSegmentId must not be null");
@@ -268,11 +267,11 @@ public class RemoteStorageManager implements org.apache.kafka.server.log.remote.
             remoteLogSegmentMetadata.remoteLogSegmentId().topicIdPartition().topicPartition(),
             startedMs, time.milliseconds());
 
-        final Optional<CustomMetadata> customMetadata = buildCustomMetadata(customMetadataBuilder);
+        //final Optional<CustomMetadata> customMetadata = buildCustomMetadata(customMetadataBuilder);
 
         log.info("Copying log segment data completed successfully, metadata: {}", remoteLogSegmentMetadata);
 
-        return customMetadata;
+        //return customMetadata;
     }
 
     private SegmentIndexesV1 uploadIndexes(
@@ -356,16 +355,6 @@ public class RemoteStorageManager implements org.apache.kafka.server.log.remote.
             return (int) size;
         } catch (final IOException e) {
             throw new RemoteStorageException("Error while getting index path size", e);
-        }
-    }
-
-    private Optional<CustomMetadata> buildCustomMetadata(final SegmentCustomMetadataBuilder customMetadataBuilder) {
-        final NavigableMap<Integer, Object> customFields = customMetadataBuilder.build();
-        if (!customFields.isEmpty()) {
-            final byte[] customMetadataBytes = customMetadataSerde.serialize(customFields);
-            return Optional.of(new CustomMetadata(customMetadataBytes));
-        } else {
-            return Optional.empty();
         }
     }
 
@@ -586,14 +575,7 @@ public class RemoteStorageManager implements org.apache.kafka.server.log.remote.
 
     private ObjectKey objectKey(final RemoteLogSegmentMetadata remoteLogSegmentMetadata,
                                 final ObjectKeyFactory.Suffix suffix) {
-        final ObjectKey segmentKey;
-        if (remoteLogSegmentMetadata.customMetadata().isPresent()) {
-            final RemoteLogSegmentMetadata. CustomMetadata customMetadataBytes = remoteLogSegmentMetadata.customMetadata().get();
-            final NavigableMap<Integer, Object> fields = customMetadataSerde.deserialize(customMetadataBytes.value());
-            segmentKey = objectKeyFactory.key(fields, remoteLogSegmentMetadata, suffix);
-        } else {
-            segmentKey = objectKeyFactory.key(remoteLogSegmentMetadata, suffix);
-        }
+        final ObjectKey segmentKey = objectKeyFactory.key(remoteLogSegmentMetadata, suffix);
         return segmentKey;
     }
 
